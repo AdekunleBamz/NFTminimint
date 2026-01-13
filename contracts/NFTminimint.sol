@@ -7,15 +7,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
     uint256 private _tokenIdCounter;
-    uint256 public constant MINT_FEE = 0.01 ether;
+    uint256 public mintFee = 0.01 ether;
 
     event NFTMinted(address indexed to, uint256 indexed tokenId, string tokenURI);
+    event MintFeeUpdated(uint256 oldFee, uint256 newFee);
 
     constructor() ERC721("NFTminimint", "NFTM") Ownable(msg.sender) {}
 
     function mintNFT(address to, string memory tokenURI) external payable {
-        require(msg.value >= MINT_FEE, "Insufficient minting fee");
-
+        require(msg.value >= mintFee, "Insufficient minting fee");
+        
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter++;
 
@@ -23,6 +24,12 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, tokenURI);
 
         emit NFTMinted(to, tokenId, tokenURI);
+    }
+
+    function setMintFee(uint256 _mintFee) external onlyOwner {
+        uint256 oldFee = mintFee;
+        mintFee = _mintFee;
+        emit MintFeeUpdated(oldFee, _mintFee);
     }
 
     function getTokenURI(uint256 tokenId) external view returns (string memory) {
@@ -50,6 +57,8 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "No funds to withdraw");
-        payable(owner()).transfer(balance);
+        
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "Transfer failed");
     }
 }
