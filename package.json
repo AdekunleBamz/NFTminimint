@@ -1,7 +1,8 @@
 {
   "name": "nftminimint",
   "version": "1.0.0",
-  "description": "A minimal NFT minting platform",
+  "description": "A minimal NFT minting platform built with Solidity and Hardhat",
+  "author": "Adekunle Bamz",
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
