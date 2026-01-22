@@ -117,6 +117,12 @@ a {
   border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ghost-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .hero {
@@ -159,6 +165,13 @@ a {
   font-weight: 600;
   border: none;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .primary-button {
@@ -290,6 +303,14 @@ a {
   padding: 12px;
   font-family: inherit;
   background: var(--surface-strong);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mint__form input:focus,
+.mint__form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .form__row {
@@ -411,6 +432,12 @@ a {
   border: 1px solid var(--border);
   display: grid;
   gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gallery__card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
 }
 
 .gallery__art {
