@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title NFTminimint
@@ -12,9 +14,25 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @notice This contract allows users to mint NFTs with custom metadata and includes
  * basic functionality for NFT creation, ownership, and fund withdrawal
  */
-contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
+contract NFTminimint is ERC721, ERC721URIStorage, Ownable, Pausable, ReentrancyGuard {
     uint256 private _tokenIdCounter;
-    uint256 public constant MINT_FEE = 0.01 ether;
+
+    uint256 public mintFee;
+    uint256 public maxSupply;
+    uint256 public maxPerWallet;
+
+    mapping(address => uint256) public mintedByWallet;
+
+    error InsufficientMintFee(uint256 sent, uint256 required);
+    error SoldOut();
+    error WalletLimitExceeded();
+    error ZeroAddress();
+    error NoFundsToWithdraw();
+    error WithdrawFailed();
+
+    event MintFeeUpdated(uint256 previousFee, uint256 newFee);
+    event MaxSupplyUpdated(uint256 previousMaxSupply, uint256 newMaxSupply);
+    event MaxPerWalletUpdated(uint256 previousMaxPerWallet, uint256 newMaxPerWallet);
 
     /**
      * @dev Emitted when an NFT is successfully minted
@@ -29,7 +47,11 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
      * @param name The name of the NFT collection
      * @param symbol The symbol for the NFT collection
      */
-    constructor() ERC721("NFTminimint", "NFTM") Ownable(msg.sender) {}
+    constructor() ERC721("NFTminimint", "NFTM") {
+        mintFee = 0.01 ether;
+        maxSupply = 1024;
+        maxPerWallet = 10;
+    }
 
     /**
      * @notice Mint a new NFT with custom metadata
@@ -37,8 +59,26 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
      * @param to The address that will receive the minted NFT
      * @param tokenURI The metadata URI for the NFT (should conform to ERC-721 metadata standard)
      */
-    function mintNFT(address to, string memory tokenURI) external payable {
-        require(msg.value >= MINT_FEE, "Insufficient minting fee");
+    function mintNFT(address to, string memory tokenURI) external payable whenNotPaused {
+        if (to == address(0)) revert ZeroAddress();
+        if (_tokenIdCounter >= maxSupply) revert SoldOut();
+        if (mintedByWallet[msg.sender] >= maxPerWallet) revert WalletLimitExceeded();
+        if (msg.value < mintFee) revert InsufficientMintFee(msg.value, mintFee);
+
+        uint256 tokenId = _tokenIdCounter;
+        _tokenIdCounter++;
+
+        mintedByWallet[msg.sender] += 1;
+
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, tokenURI);
+
+        emit NFTMinted(to, tokenId, tokenURI);
+    }
+
+    function ownerMint(address to, string memory tokenURI) external onlyOwner {
+        if (to == address(0)) revert ZeroAddress();
+        if (_tokenIdCounter >= maxSupply) revert SoldOut();
 
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter++;
@@ -47,6 +87,33 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, tokenURI);
 
         emit NFTMinted(to, tokenId, tokenURI);
+    }
+
+    function setMintFee(uint256 newMintFee) external onlyOwner {
+        uint256 previous = mintFee;
+        mintFee = newMintFee;
+        emit MintFeeUpdated(previous, newMintFee);
+    }
+
+    function setMaxSupply(uint256 newMaxSupply) external onlyOwner {
+        require(newMaxSupply >= _tokenIdCounter, "maxSupply < totalSupply");
+        uint256 previous = maxSupply;
+        maxSupply = newMaxSupply;
+        emit MaxSupplyUpdated(previous, newMaxSupply);
+    }
+
+    function setMaxPerWallet(uint256 newMaxPerWallet) external onlyOwner {
+        uint256 previous = maxPerWallet;
+        maxPerWallet = newMaxPerWallet;
+        emit MaxPerWalletUpdated(previous, newMaxPerWallet);
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     /**
@@ -86,9 +153,12 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable {
      * @dev Allows the contract owner to withdraw accumulated funds from NFT minting fees
      * @dev Only callable by the contract owner
      */
-    function withdraw() external onlyOwner {
+    function withdraw(address payable to) external onlyOwner nonReentrant {
+        if (to == address(0)) revert ZeroAddress();
         uint256 balance = address(this).balance;
-        require(balance > 0, "No funds to withdraw");
-        payable(owner()).transfer(balance);
+        if (balance == 0) revert NoFundsToWithdraw();
+
+        (bool ok, ) = to.call{value: balance}("");
+        if (!ok) revert WithdrawFailed();
     }
 }
