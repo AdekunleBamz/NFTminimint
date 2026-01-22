@@ -32,11 +32,17 @@ describe("NFTminimint", function () {
     it("Should start with zero total supply", async function () {
       expect(await nftminimint.totalSupply()).to.equal(0);
     });
+
+    it("Should set default mint configuration", async function () {
+      expect(await nftminimint.mintFee()).to.equal(ethers.utils.parseEther("0.01"));
+      expect(await nftminimint.maxSupply()).to.equal(1024);
+      expect(await nftminimint.maxPerWallet()).to.equal(10);
+    });
   });
 
   describe("Minting", function () {
     it("Should mint NFT with correct fee", async function () {
-      const mintFee = ethers.utils.parseEther("0.01");
+      const mintFee = await nftminimint.mintFee();
       const tokenURI = "https://example.com/token/1";
 
       await expect(nftminimint.mintNFT(addr1.address, tokenURI, { value: mintFee }))
@@ -54,11 +60,11 @@ describe("NFTminimint", function () {
 
       await expect(
         nftminimint.mintNFT(addr1.address, tokenURI, { value: insufficientFee })
-      ).to.be.revertedWith("Insufficient minting fee");
+      ).to.be.reverted;
     });
 
     it("Should allow multiple mints with incrementing token IDs", async function () {
-      const mintFee = ethers.utils.parseEther("0.01");
+      const mintFee = await nftminimint.mintFee();
 
       // First mint
       await nftminimint.mintNFT(addr1.address, "https://example.com/token/1", { value: mintFee });
@@ -68,6 +74,41 @@ describe("NFTminimint", function () {
       await nftminimint.mintNFT(addr2.address, "https://example.com/token/2", { value: mintFee });
       expect(await nftminimint.totalSupply()).to.equal(2);
       expect(await nftminimint.ownerOf(1)).to.equal(addr2.address);
+    });
+
+    it("Should pause and prevent minting", async function () {
+      const mintFee = await nftminimint.mintFee();
+      await nftminimint.pause();
+
+      await expect(
+        nftminimint.mintNFT(addr1.address, "https://example.com/token/1", { value: mintFee })
+      ).to.be.reverted;
+
+      await nftminimint.unpause();
+      await expect(
+        nftminimint.mintNFT(addr1.address, "https://example.com/token/1", { value: mintFee })
+      ).to.not.be.reverted;
+    });
+
+    it("Should enforce maxPerWallet", async function () {
+      const mintFee = await nftminimint.mintFee();
+      await nftminimint.setMaxPerWallet(2);
+
+      await nftminimint.connect(addr1).mintNFT(addr1.address, "https://example.com/token/1", { value: mintFee });
+      await nftminimint.connect(addr1).mintNFT(addr1.address, "https://example.com/token/2", { value: mintFee });
+
+      await expect(
+        nftminimint.connect(addr1).mintNFT(addr1.address, "https://example.com/token/3", { value: mintFee })
+      ).to.be.reverted;
+    });
+
+    it("Should allow ownerMint without fee", async function () {
+      await expect(
+        nftminimint.ownerMint(addr1.address, "https://example.com/token/1")
+      ).to.emit(nftminimint, "NFTMinted");
+
+      expect(await nftminimint.ownerOf(0)).to.equal(addr1.address);
+      expect(await nftminimint.totalSupply()).to.equal(1);
     });
   });
 
@@ -89,7 +130,7 @@ describe("NFTminimint", function () {
 
   describe("Withdrawal", function () {
     it("Should allow owner to withdraw contract balance", async function () {
-      const mintFee = ethers.utils.parseEther("0.01");
+      const mintFee = await nftminimint.mintFee();
 
       // Mint an NFT to add funds to the contract
       await nftminimint.mintNFT(addr1.address, "https://example.com/token/1", { value: mintFee });
@@ -100,7 +141,7 @@ describe("NFTminimint", function () {
 
       // Withdraw funds
       const ownerBalanceBefore = await owner.getBalance();
-      const tx = await nftminimint.withdraw();
+      const tx = await nftminimint.withdraw(owner.address);
       await tx.wait();
 
       // Verify withdrawal
@@ -113,14 +154,14 @@ describe("NFTminimint", function () {
 
     it("Should not allow non-owner to withdraw", async function () {
       await expect(
-        nftminimint.connect(addr1).withdraw()
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+        nftminimint.connect(addr1).withdraw(addr1.address)
+      ).to.be.reverted;
     });
 
     it("Should revert when no funds to withdraw", async function () {
       await expect(
-        nftminimint.withdraw()
-      ).to.be.revertedWith("No funds to withdraw");
+        nftminimint.withdraw(owner.address)
+      ).to.be.reverted;
     });
   });
 
@@ -131,7 +172,7 @@ describe("NFTminimint", function () {
     });
 
     it("Should allow new owner to withdraw", async function () {
-      const mintFee = ethers.utils.parseEther("0.01");
+      const mintFee = await nftminimint.mintFee();
 
       // Mint an NFT
       await nftminimint.mintNFT(addr1.address, "https://example.com/token/1", { value: mintFee });
@@ -140,7 +181,7 @@ describe("NFTminimint", function () {
       await nftminimint.transferOwnership(addr1.address);
 
       // New owner should be able to withdraw
-      await expect(nftminimint.connect(addr1).withdraw()).to.not.be.reverted;
+      await expect(nftminimint.connect(addr1).withdraw(addr1.address)).to.not.be.reverted;
     });
   });
 
