@@ -29,10 +29,15 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable, Pausable, ReentrancyG
     error ZeroAddress();
     error NoFundsToWithdraw();
     error WithdrawFailed();
+    error InvalidQuantity();
+    error ExceedsMaxBatchSize();
 
     event MintFeeUpdated(uint256 previousFee, uint256 newFee);
     event MaxSupplyUpdated(uint256 previousMaxSupply, uint256 newMaxSupply);
     event MaxPerWalletUpdated(uint256 previousMaxPerWallet, uint256 newMaxPerWallet);
+    event BatchMinted(address indexed to, uint256 startTokenId, uint256 quantity);
+
+    uint256 public constant MAX_BATCH_SIZE = 10;
 
     /**
      * @dev Emitted when an NFT is successfully minted
@@ -76,6 +81,38 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable, Pausable, ReentrancyG
         emit NFTMinted(to, tokenId, tokenURI);
     }
 
+    /**
+     * @notice Batch mint multiple NFTs at once
+     * @dev Mints multiple NFTs to the specified address with the given token URIs
+     * @param to The address that will receive the minted NFTs
+     * @param tokenURIs Array of metadata URIs for the NFTs
+     */
+    function batchMint(address to, string[] calldata tokenURIs) external payable whenNotPaused {
+        uint256 quantity = tokenURIs.length;
+        
+        if (to == address(0)) revert ZeroAddress();
+        if (quantity == 0) revert InvalidQuantity();
+        if (quantity > MAX_BATCH_SIZE) revert ExceedsMaxBatchSize();
+        if (_tokenIdCounter + quantity > maxSupply) revert SoldOut();
+        if (mintedByWallet[msg.sender] + quantity > maxPerWallet) revert WalletLimitExceeded();
+        if (msg.value < mintFee * quantity) revert InsufficientMintFee(msg.value, mintFee * quantity);
+
+        uint256 startTokenId = _tokenIdCounter;
+        
+        for (uint256 i = 0; i < quantity; i++) {
+            uint256 tokenId = _tokenIdCounter;
+            _tokenIdCounter++;
+            
+            _safeMint(to, tokenId);
+            _setTokenURI(tokenId, tokenURIs[i]);
+            
+            emit NFTMinted(to, tokenId, tokenURIs[i]);
+        }
+        
+        mintedByWallet[msg.sender] += quantity;
+        emit BatchMinted(to, startTokenId, quantity);
+    }
+
     function ownerMint(address to, string memory tokenURI) external onlyOwner {
         if (to == address(0)) revert ZeroAddress();
         if (_tokenIdCounter >= maxSupply) revert SoldOut();
@@ -114,6 +151,46 @@ contract NFTminimint is ERC721, ERC721URIStorage, Ownable, Pausable, ReentrancyG
 
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    /**
+     * @notice Get remaining mintable supply
+     * @return The number of NFTs that can still be minted
+     */
+    function remainingSupply() external view returns (uint256) {
+        return maxSupply - _tokenIdCounter;
+    }
+
+    /**
+     * @notice Get remaining mints for a wallet
+     * @param wallet The wallet address to check
+     * @return The number of NFTs the wallet can still mint
+     */
+    function remainingForWallet(address wallet) external view returns (uint256) {
+        uint256 minted = mintedByWallet[wallet];
+        if (minted >= maxPerWallet) return 0;
+        return maxPerWallet - minted;
+    }
+
+    /**
+     * @notice Check if an address can mint
+     * @param wallet The wallet address to check
+     * @return True if the wallet can mint at least one NFT
+     */
+    function canMint(address wallet) external view returns (bool) {
+        if (paused()) return false;
+        if (_tokenIdCounter >= maxSupply) return false;
+        if (mintedByWallet[wallet] >= maxPerWallet) return false;
+        return true;
+    }
+
+    /**
+     * @notice Get minting cost for a quantity
+     * @param quantity Number of NFTs to mint
+     * @return Total cost in wei
+     */
+    function getMintCost(uint256 quantity) external view returns (uint256) {
+        return mintFee * quantity;
     }
 
     /**
