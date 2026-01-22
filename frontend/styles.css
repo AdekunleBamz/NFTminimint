@@ -427,6 +427,31 @@ a {
   background: linear-gradient(135deg, #f0abfc, #c4b5fd, #38bdf8);
 }
 
+.testimonials__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.testimonial {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 16px;
+}
+
+.testimonial p {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.testimonial span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
 .roadmap__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
