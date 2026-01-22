@@ -10,6 +10,14 @@ A minimal NFT minting platform built with Solidity and Hardhat.
 
 ## Installation
 
+> Note: Hardhat requires a supported Node.js LTS. This repo includes a `.nvmrc`.
+
+```bash
+# if you use nvm
+nvm install
+nvm use
+```
+
 ```bash
 npm install
 ```
