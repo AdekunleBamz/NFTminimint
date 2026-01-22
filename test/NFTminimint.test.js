@@ -196,4 +196,111 @@ describe("NFTminimint", function () {
       expect(await nftminimint.supportsInterface(ERC721_METADATA_INTERFACE_ID)).to.be.true;
     });
   });
+
+  describe("Batch Minting", function () {
+    it("Should batch mint multiple NFTs", async function () {
+      const mintFee = await nftminimint.mintFee();
+      const tokenURIs = [
+        "https://example.com/token/1",
+        "https://example.com/token/2",
+        "https://example.com/token/3"
+      ];
+      const totalCost = mintFee.mul(tokenURIs.length);
+
+      await expect(
+        nftminimint.connect(addr1).batchMint(addr1.address, tokenURIs, { value: totalCost })
+      ).to.emit(nftminimint, "BatchMinted")
+        .withArgs(addr1.address, 0, 3);
+
+      expect(await nftminimint.totalSupply()).to.equal(3);
+      expect(await nftminimint.ownerOf(0)).to.equal(addr1.address);
+      expect(await nftminimint.ownerOf(1)).to.equal(addr1.address);
+      expect(await nftminimint.ownerOf(2)).to.equal(addr1.address);
+    });
+
+    it("Should fail batch mint with insufficient fee", async function () {
+      const mintFee = await nftminimint.mintFee();
+      const tokenURIs = ["uri1", "uri2", "uri3"];
+      const insufficientFee = mintFee.mul(2); // Only pay for 2
+
+      await expect(
+        nftminimint.connect(addr1).batchMint(addr1.address, tokenURIs, { value: insufficientFee })
+      ).to.be.reverted;
+    });
+
+    it("Should fail batch mint with empty array", async function () {
+      await expect(
+        nftminimint.connect(addr1).batchMint(addr1.address, [], { value: 0 })
+      ).to.be.reverted;
+    });
+
+    it("Should fail batch mint exceeding MAX_BATCH_SIZE", async function () {
+      const mintFee = await nftminimint.mintFee();
+      const tokenURIs = Array(11).fill("uri"); // 11 URIs
+      const totalCost = mintFee.mul(tokenURIs.length);
+
+      await expect(
+        nftminimint.connect(addr1).batchMint(addr1.address, tokenURIs, { value: totalCost })
+      ).to.be.reverted;
+    });
+
+    it("Should respect wallet limit in batch mint", async function () {
+      const mintFee = await nftminimint.mintFee();
+      await nftminimint.setMaxPerWallet(3);
+
+      const tokenURIs = ["uri1", "uri2", "uri3", "uri4"]; // 4 URIs but limit is 3
+      const totalCost = mintFee.mul(tokenURIs.length);
+
+      await expect(
+        nftminimint.connect(addr1).batchMint(addr1.address, tokenURIs, { value: totalCost })
+      ).to.be.reverted;
+    });
+  });
+
+  describe("Utility Functions", function () {
+    it("Should return remaining supply", async function () {
+      const maxSupply = await nftminimint.maxSupply();
+      expect(await nftminimint.remainingSupply()).to.equal(maxSupply);
+
+      const mintFee = await nftminimint.mintFee();
+      await nftminimint.mintNFT(addr1.address, "uri", { value: mintFee });
+
+      expect(await nftminimint.remainingSupply()).to.equal(maxSupply.sub(1));
+    });
+
+    it("Should return remaining for wallet", async function () {
+      const maxPerWallet = await nftminimint.maxPerWallet();
+      expect(await nftminimint.remainingForWallet(addr1.address)).to.equal(maxPerWallet);
+
+      const mintFee = await nftminimint.mintFee();
+      await nftminimint.connect(addr1).mintNFT(addr1.address, "uri", { value: mintFee });
+
+      expect(await nftminimint.remainingForWallet(addr1.address)).to.equal(maxPerWallet.sub(1));
+    });
+
+    it("Should correctly report canMint status", async function () {
+      expect(await nftminimint.canMint(addr1.address)).to.be.true;
+
+      // Pause should disable minting
+      await nftminimint.pause();
+      expect(await nftminimint.canMint(addr1.address)).to.be.false;
+
+      await nftminimint.unpause();
+      expect(await nftminimint.canMint(addr1.address)).to.be.true;
+
+      // Max out wallet
+      const mintFee = await nftminimint.mintFee();
+      await nftminimint.setMaxPerWallet(1);
+      await nftminimint.connect(addr1).mintNFT(addr1.address, "uri", { value: mintFee });
+      expect(await nftminimint.canMint(addr1.address)).to.be.false;
+    });
+
+    it("Should calculate mint cost correctly", async function () {
+      const mintFee = await nftminimint.mintFee();
+      
+      expect(await nftminimint.getMintCost(1)).to.equal(mintFee);
+      expect(await nftminimint.getMintCost(5)).to.equal(mintFee.mul(5));
+      expect(await nftminimint.getMintCost(10)).to.equal(mintFee.mul(10));
+    });
+  });
 });
