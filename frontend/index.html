@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NFTminimint • Minimal NFT Minting</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <header class="site-header">
+        <div class="brand">
+          <span class="brand__icon">◇</span>
+          <div>
+            <p class="brand__title">NFTminimint</p>
+            <p class="brand__subtitle">Minimal, elegant NFT minting</p>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="#mint">Mint</a>
+          <a href="#gallery">Gallery</a>
+          <a href="#roadmap">Roadmap</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <button class="ghost-button" id="themeToggle">Toggle Theme</button>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero__content">
+            <p class="hero__eyebrow">Launch your collection in minutes</p>
+            <h1>Design-first NFT minting for modern creators.</h1>
+            <p class="hero__description">
+              NFTminimint is a minimal ERC-721 minting toolkit with a sleek interface,
+              thoughtful defaults, and a delightful minting flow.
+            </p>
+            <div class="hero__cta">
+              <a class="primary-button" href="#mint">Start Minting</a>
+              <a class="secondary-button" href="#gallery">Explore Drops</a>
+            </div>
+            <div class="hero__stats">
+              <div>
+                <h3>0.01 ETH</h3>
+                <p>Mint fee</p>
+              </div>
+              <div>
+                <h3>1,024</h3>
+                <p>Max supply</p>
+              </div>
+              <div>
+                <h3>3.2s</h3>
+                <p>Average mint</p>
+              </div>
+            </div>
+          </div>
+          <div class="hero__card">
+            <div class="hero__card-image">
+              <div class="hero__badge">Featured Drop</div>
+              <div class="hero__glow"></div>
+              <div class="hero__token" id="tokenPreview">
+                <p class="token__title">Aurora #000</p>
+                <p class="token__subtitle">Genesis Edition</p>
+              </div>
+            </div>
+            <div class="hero__card-body">
+              <div>
+                <p class="label">Collection</p>
+                <h4>Orbit Lights</h4>
+              </div>
+              <div>
+                <p class="label">Creator</p>
+                <h4>Studio Lumen</h4>
+              </div>
+              <div>
+                <p class="label">Supply</p>
+                <h4>512</h4>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="mint" class="section mint">
+          <div class="section__title">
+            <p class="section__eyebrow">Mint an NFT</p>
+            <h2>Mint with confidence</h2>
+            <p>Generate metadata, preview your NFT, and mint on-chain in one flow.</p>
+          </div>
+          <div class="mint__grid">
+            <form class="mint__form" id="mintForm">
+              <label>
+                NFT Name
+                <input type="text" name="name" placeholder="Aurora" required />
+              </label>
+              <label>
+                Collection Symbol
+                <input type="text" name="symbol" placeholder="AUR" required />
+              </label>
+              <label>
+                Metadata URI
+                <input type="url" name="uri" placeholder="https://example.com/metadata.json" required />
+              </label>
+              <label>
+                Description
+                <textarea name="description" rows="4" placeholder="Describe your drop..." required></textarea>
+              </label>
+              <div class="form__row">
+                <label>
+                  Supply
+                  <input type="number" name="supply" min="1" max="1024" value="10" />
+                </label>
+                <label>
+                  Mint Fee (ETH)
+                  <input type="number" name="fee" step="0.001" value="0.01" />
+                </label>
+              </div>
+              <button class="primary-button" type="submit">Preview &amp; Mint</button>
+              <p class="form__hint">Powered by Hardhat + OpenZeppelin</p>
+            </form>
+            <div class="mint__preview" aria-live="polite">
+              <div class="mint__preview-card">
+                <div class="mint__preview-header">
+                  <span class="pill">Live Preview</span>
+                  <span class="pill pill--accent">On-chain ready</span>
+                </div>
+                <div class="mint__preview-art" id="previewArt">
+                  <p id="previewTitle">Aurora</p>
+                  <p id="previewSubtitle">AUR • 0.01 ETH</p>
+                </div>
+                <div class="mint__preview-body">
+                  <h3 id="previewName">Aurora</h3>
+                  <p id="previewDescription">
+                    Describe your drop to see it update in real time.
+                  </p>
+                  <div class="mint__preview-meta">
+                    <div>
+                      <p class="label">Supply</p>
+                      <h4 id="previewSupply">10</h4>
+                    </div>
+                    <div>
+                      <p class="label">Token URI</p>
+                      <h4 id="previewUri">https://example.com/metadata.json</h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mint__status">
+                <div>
+                  <p class="label">Wallet</p>
+                  <h4>0x8D2...27F0</h4>
+                </div>
+                <div>
+                  <p class="label">Network</p>
+                  <h4>Ethereum Sepolia</h4>
+                </div>
+                <div>
+                  <p class="label">Estimated Gas</p>
+                  <h4>0.0023 ETH</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="gallery" class="section gallery">
+          <div class="section__title">
+            <p class="section__eyebrow">Gallery</p>
+            <h2>Curated community drops</h2>
+            <p>Explore a collection of fictional drops to visualize your own brand.</p>
+          </div>
+          <div class="gallery__grid">
+            <article class="gallery__card">
+              <div class="gallery__art"></div>
+              <div>
+                <h3>Solar Drift</h3>
+                <p>Limited 128 supply · 0.008 ETH</p>
+              </div>
+            </article>
+            <article class="gallery__card">
+              <div class="gallery__art gallery__art--alt"></div>
+              <div>
+                <h3>Opal Bloom</h3>
+                <p>Limited 256 supply · 0.012 ETH</p>
+              </div>
+            </article>
+            <article class="gallery__card">
+              <div class="gallery__art gallery__art--tertiary"></div>
+              <div>
+                <h3>Neon Tides</h3>
+                <p>Limited 64 supply · 0.02 ETH</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="roadmap" class="section roadmap">
+          <div class="section__title">
+            <p class="section__eyebrow">Roadmap</p>
+            <h2>What ships next</h2>
+            <p>Thoughtfully scoped upgrades for creators and collectors.</p>
+          </div>
+          <div class="roadmap__grid">
+            <div class="roadmap__item">
+              <span class="pill">Q1</span>
+              <h3>Creator Profiles</h3>
+              <p>Launch custom creator dashboards with collection analytics.</p>
+            </div>
+            <div class="roadmap__item">
+              <span class="pill">Q2</span>
+              <h3>Royalty Engine</h3>
+              <p>Configurable on-chain royalties with EIP-2981 support.</p>
+            </div>
+            <div class="roadmap__item">
+              <span class="pill">Q3</span>
+              <h3>Multichain Minting</h3>
+              <p>Deploy seamlessly to Polygon, Base, and Optimism.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" class="section faq">
+          <div class="section__title">
+            <p class="section__eyebrow">FAQ</p>
+            <h2>Everything you need</h2>
+          </div>
+          <div class="faq__grid">
+            <div>
+              <h3>Is NFTminimint production-ready?</h3>
+              <p>
+                The smart contract uses OpenZeppelin libraries and is optimized for secure minting. The
+                frontend is a reference template to accelerate your launch.
+              </p>
+            </div>
+            <div>
+              <h3>Can I customize mint fees?</h3>
+              <p>Yes. Adjust the fee in the contract and mirror it in your UI settings.</p>
+            </div>
+            <div>
+              <h3>How do I deploy?</h3>
+              <p>Use Hardhat scripts and configure your desired network in hardhat.config.js.</p>
+            </div>
+            <div>
+              <h3>Can I use IPFS?</h3>
+              <p>Absolutely. Point the metadata URI to IPFS gateways or direct CIDs.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <h4>Build with NFTminimint</h4>
+          <p>Minimal tooling for maximal creativity.</p>
+        </div>
+        <div class="footer__links">
+          <a href="https://github.com/AdekunleBamz/NFTminimint" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="#mint">Mint</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

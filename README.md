@@ -31,6 +31,17 @@ npx hardhat run scripts/deploy.js --network <network-name>
 // Use the deployed contract address and ABI to mint
 ```
 
+## Frontend (Preview)
+
+Open the static frontend in your browser:
+
+```bash
+open frontend/index.html
+```
+
+The UI includes a live minting preview, gallery, and roadmap sections to help you
+visualize a polished NFT minting experience.
+
 ## Contract Details
 
 - **Standard**: ERC-721
