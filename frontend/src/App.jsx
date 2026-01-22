@@ -5,6 +5,7 @@ import Header from './components/Header'
 import MintCard from './components/MintCard'
 import Stats from './components/Stats'
 import RecentMints from './components/RecentMints'
+import Gallery from './components/Gallery'
 import Footer from './components/Footer'
 import './App.css'
 
@@ -68,6 +69,8 @@ function App() {
             <RecentMints provider={provider} contractAddress={contractAddress} />
           </aside>
         </div>
+
+        <Gallery provider={provider} contractAddress={contractAddress} />
       </main>
 
       <Footer />
