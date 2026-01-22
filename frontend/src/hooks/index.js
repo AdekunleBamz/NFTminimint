@@ -1,5 +1,6 @@
 export { useWallet } from './useWallet'
 export { useContract } from './useContract'
+export { useNFTContract } from './useNFTContract'
 export { useToast } from './useToast'
 export { useLocalStorage, useSessionStorage } from './useStorage'
 export { 
