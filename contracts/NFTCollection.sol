@@ -169,6 +169,7 @@ contract NFTCollection is Ownable, IERC2981 {
         delete tokenRoyaltyRecipient[tokenId];
         delete tokenRoyaltyBps[tokenId];
         hasTokenRoyalty[tokenId] = false;
+        emit TokenRoyaltyDeleted(tokenId);
     }
 
     // ============ VIEW FUNCTIONS ============
