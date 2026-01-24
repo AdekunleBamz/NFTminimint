@@ -399,6 +399,32 @@ contract MyNFT is NFTCore, NFTWalletCap {
 }
 ```
 
+### NFTTokenLockup
+Locks individual tokens until a specific timestamp.
+
+**Features:**
+- Per-token lock timestamp
+- Guard helper for transfer hooks
+
+**Usage:**
+```solidity
+import "./extensions/NFTTokenLockup.sol";
+
+contract MyNFT is ERC721, NFTTokenLockup {
+    function lock(uint256 tokenId, uint256 untilTimestamp) external onlyOwner {
+        _lockToken(tokenId, untilTimestamp);
+    }
+
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            _checkTokenLockup(tokenId);
+        }
+        return super._update(to, tokenId, auth);
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
