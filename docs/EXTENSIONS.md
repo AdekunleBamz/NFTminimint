@@ -619,3 +619,28 @@ contract MyNFT is NFTCore, NFTReferral {
     }
 }
 ```
+
+### NFTLazyMint
+Voucher-based lazy minting.
+
+**Features:**
+- Signed voucher verification
+- One-time voucher redemption
+- Voucher signer management
+
+**Usage:**
+```solidity
+import "./extensions/NFTLazyMint.sol";
+
+contract MyNFT is NFTCore, NFTLazyMint {
+    function setVoucherSigner(address signer) external onlyOwner {
+        _setVoucherSigner(signer);
+    }
+
+    function redeemVoucher(MintVoucher calldata voucher) external payable {
+        require(_verifyVoucher(voucher), "Invalid voucher");
+        _useVoucher(voucher);
+        // mint logic here
+    }
+}
+```
