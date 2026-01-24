@@ -1,12 +1,26 @@
 # NFTminimint
 
-A minimal NFT minting platform built with Solidity and Hardhat.
+A modular, fee-free NFT minting platform built with Solidity and Hardhat.
 
-## Features
+## 🚀 Features
 
-- Simple ERC-721 NFT contract
-- Mint NFTs with custom metadata
-- Deploy to Ethereum-compatible networks
+- **Modular Architecture**: 5 separate deployable contracts
+- **FREE Minting**: No minting fees - completely free!
+- **ERC-721 Standard**: Full OpenZeppelin v5 compliance
+- **EIP-2981 Royalties**: Built-in royalty support
+- **Whitelist System**: Flexible access control
+- **Batch Operations**: Batch mint and airdrop support
+- **Metadata Management**: Custom attributes and freezing
+
+## 📦 Contract Architecture
+
+| Contract | Purpose |
+|----------|---------|
+| NFTCore | Base ERC721 with minting/burning |
+| NFTMetadata | Custom attributes and metadata |
+| NFTAccess | Whitelist and access control |
+| NFTCollection | Supply limits and royalties |
+| NFTminimint | Main controller interface |
 
 ## Installation
 
@@ -22,21 +36,26 @@ nvm use
 npm install
 ```
 
-## Usage
+## Quick Start
 
-1. Compile the contract:
+1. Compile contracts:
 ```bash
 npx hardhat compile
 ```
 
-2. Deploy to a network:
+2. Run tests:
 ```bash
-npx hardhat run scripts/deploy.js --network <network-name>
+npx hardhat test
 ```
 
-3. Mint an NFT:
-```javascript
-// Use the deployed contract address and ABI to mint
+3. Deploy all contracts:
+```bash
+npx hardhat run scripts/deploy-all.js --network <network>
+```
+
+4. Link contracts:
+```bash
+npx hardhat run scripts/link-contracts.js --network <network>
 ```
 
 ## Frontend (Preview)
@@ -52,9 +71,17 @@ visualize a polished NFT minting experience.
 
 ## Contract Details
 
-- **Standard**: ERC-721
-- **Network**: Ethereum, Polygon, etc.
-- **Minting Fee**: 0.01 ETH per NFT
+- **Standard**: ERC-721 + EIP-2981
+- **Solidity**: ^0.8.20
+- **OpenZeppelin**: v5.0.0
+- **Minting Fee**: FREE! 🎉
+
+## 📚 Documentation
+
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [API Reference](docs/API.md)
+- [Security Guide](docs/SECURITY.md)
 
 ## 🤝 Contributing
 
@@ -62,11 +89,10 @@ We welcome contributions to the NFTminimint project! Here's how you can help:
 
 ### Ways to Contribute
 
-- **Smart Contracts**: Enhance the NFT contract with new features, improve gas efficiency, or add security mechanisms
-- **Frontend Development**: Build a user interface for minting NFTs, create galleries, or add wallet integration
-- **Testing**: Add comprehensive test coverage for contracts and deployment scripts
-- **Documentation**: Improve docs, add tutorials, create developer guides for NFT development
-- **Multi-Chain**: Add support for additional blockchain networks (Polygon, Arbitrum, Optimism)
+- **Smart Contracts**: Enhance contracts with new features, improve gas efficiency
+- **Testing**: Add comprehensive test coverage
+- **Documentation**: Improve docs, add tutorials
+- **Multi-Chain**: Add support for additional networks
 - **NFT Features**: Implement royalties, metadata standards, or marketplace functionality
 - **Security**: Audit contracts, implement access controls, or add emergency mechanisms
 

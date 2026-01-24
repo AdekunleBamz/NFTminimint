@@ -1,22 +1,41 @@
 {
   "name": "nftminimint",
-  "version": "1.0.0",
-  "description": "A minimal NFT minting platform built with Solidity and Hardhat",
+  "version": "2.0.0",
+  "description": "A comprehensive NFT minting platform with advanced features - FREE MINTING!",
   "author": "Adekunle Bamz",
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
-    "deploy": "npx hardhat run scripts/deploy.js"
+    "test:gas": "npx hardhat test test/Gas.test.js",
+    "test:security": "npx hardhat test test/Security.test.js",
+    "test:integration": "npx hardhat test test/Integration.test.js",
+    "deploy": "npx hardhat run scripts/deploy-all.js",
+    "deploy:sepolia": "npx hardhat run scripts/deploy-all.js --network sepolia",
+    "deploy:mainnet": "npx hardhat run scripts/deploy-all.js --network mainnet",
+    "link": "npx hardhat run scripts/link-contracts.js",
+    "verify": "npx hardhat run scripts/verify-contracts.js",
+    "stats": "npx hardhat run scripts/collection-stats.js",
+    "airdrop": "npx hardhat run scripts/airdrop.js",
+    "coverage": "npx hardhat coverage"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "@nomiclabs/hardhat-waffle": "^2.0.6",
-    "@openzeppelin/contracts": "^4.9.0",
-    "chai": "^4.3.10",
-    "ethereum-waffle": "^4.0.10",
-    "ethers": "^5.7.2",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1",
     "hardhat": "^2.19.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "nft",
+    "ethereum",
+    "solidity",
+    "erc721",
+    "minting",
+    "free"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/NFTminimint"
+  }
 }
