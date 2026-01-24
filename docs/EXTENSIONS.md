@@ -182,6 +182,34 @@ contract MyNFT is NFTCore, NFTPermit {
     }
     
     function _ownerOfPermit(uint256 tokenId) internal view override returns (address) {
+
+    ### NFTMerkleAllowance
+    Merkle allowlist where each address has an explicit mint allowance.
+
+    **Features:**
+    - Merkle root verification with `(account, allowance)` leaf
+    - Track claimed quantity per wallet
+    - Enable/disable allowance minting
+
+    **Usage:**
+    ```solidity
+    import "./extensions/NFTMerkleAllowance.sol";
+
+    contract MyNFT is NFTCore, NFTMerkleAllowance {
+        function setAllowanceRoot(bytes32 root) external onlyOwner {
+            _setAllowanceMerkleRoot(root);
+        }
+
+        function setAllowanceEnabled(bool enabled) external onlyOwner {
+            _setAllowanceMintEnabled(enabled);
+        }
+
+        function allowlistMint(uint256 quantity, uint256 allowance, bytes32[] calldata proof) external {
+            _validateAndConsumeAllowance(proof, msg.sender, quantity, allowance);
+            // mint `quantity` tokens
+        }
+    }
+    ```
         return _ownerOf(tokenId);
     }
     
