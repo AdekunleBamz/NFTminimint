@@ -323,6 +323,36 @@ contract MyNFT is NFTCore, NFTMintCooldown {
 }
 ```
 
+### NFTTransferAllowlist
+Restricts transfers so only approved recipient addresses can receive tokens.
+
+**Features:**
+- Enable/disable recipient allowlist
+- Per-recipient allowlist mapping
+
+**Usage:**
+```solidity
+import "./extensions/NFTTransferAllowlist.sol";
+
+contract MyNFT is ERC721, NFTTransferAllowlist {
+    function setAllowlistEnabled(bool enabled) external onlyOwner {
+        _setTransferAllowlistEnabled(enabled);
+    }
+
+    function setRecipientAllowed(address account, bool allowed) external onlyOwner {
+        _setRecipientAllowed(account, allowed);
+    }
+
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            _checkTransferRecipient(to);
+        }
+        return super._update(to, tokenId, auth);
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
