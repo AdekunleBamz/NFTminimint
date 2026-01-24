@@ -47,4 +47,27 @@ describe("NFTCollection", function () {
         .withArgs(5000);
     });
   });
+
+  describe("Royalties", function () {
+    it("Should set default royalty", async function () {
+      await nftCollection.setDefaultRoyalty(owner.address, 500); // 5%
+      const [receiver, amount] = await nftCollection.royaltyInfo(1, 10000);
+      expect(receiver).to.equal(owner.address);
+      expect(amount).to.equal(500);
+    });
+
+    it("Should emit DefaultRoyaltySet event", async function () {
+      await expect(nftCollection.setDefaultRoyalty(owner.address, 500))
+        .to.emit(nftCollection, "DefaultRoyaltySet")
+        .withArgs(owner.address, 500);
+    });
+
+    it("Should set token-specific royalty", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      await nftCollection.setTokenRoyalty(1, addr1.address, 1000); // 10%
+      const [receiver, amount] = await nftCollection.royaltyInfo(1, 10000);
+      expect(receiver).to.equal(addr1.address);
+      expect(amount).to.equal(1000);
+    });
+  });
 });
