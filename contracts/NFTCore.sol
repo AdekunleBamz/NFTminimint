@@ -234,4 +234,18 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+
+    /**
+     * @notice Get total burned tokens
+     */
+    function totalBurned() external view returns (uint256) {
+        return _burnedCount;
+    }
+
+    /**
+     * @notice Get current circulating supply (minted - burned)
+     */
+    function circulatingSupply() external view returns (uint256) {
+        return _tokenIdCounter - _burnedCount;
+    }
 }
