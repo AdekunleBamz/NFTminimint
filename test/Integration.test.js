@@ -151,4 +151,19 @@ describe("NFTminimint Integration", function () {
       expect(await nftMetadata.contractURI()).to.equal("ipfs://collection-metadata");
     });
   });
+
+  describe("Royalty Integration", function () {
+    it("Should set and retrieve default royalty", async function () {
+      await nftCollection.setDefaultRoyalty(owner.address, 500); // 5%
+      const [receiver, amount] = await nftCollection.royaltyInfo(1, 10000);
+      expect(receiver).to.equal(owner.address);
+      expect(amount).to.equal(500);
+    });
+
+    it("Should get remaining supply", async function () {
+      await nftMinimint.mint("ipfs://supply1");
+      const remaining = await nftCollection.remainingSupply();
+      expect(remaining).to.equal(9999); // 10000 - 1
+    });
+  });
 });
