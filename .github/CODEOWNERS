@@ -1,0 +1,11 @@
+# Global owners
+* @AdekunleBamz
+
+# Smart contracts
+/contracts/ @AdekunleBamz
+
+# Tests
+/test/ @AdekunleBamz
+
+# Scripts
+/scripts/ @AdekunleBamz
