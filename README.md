@@ -1,5 +1,10 @@
 # NFTminimint
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-blue.svg)](https://soliditylang.org/)
+[![Hardhat](https://img.shields.io/badge/Built%20with-Hardhat-yellow.svg)](https://hardhat.org/)
+[![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-v5.0-blue.svg)](https://openzeppelin.com/)
+
 A modular, fee-free NFT minting platform built with Solidity and Hardhat.
 
 ## 🚀 Features
