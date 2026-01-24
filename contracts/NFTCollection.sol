@@ -70,6 +70,9 @@ contract NFTCollection is Ownable, IERC2981 {
     
     /// @dev Emitted when NFTCore reference updates
     event NFTCoreUpdated(address indexed newCore);
+    
+    /// @dev Emitted when token royalty is deleted
+    event TokenRoyaltyDeleted(uint256 indexed tokenId);
 
     /**
      * @dev Constructor
