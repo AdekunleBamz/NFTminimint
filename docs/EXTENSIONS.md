@@ -526,3 +526,37 @@ contract MyNFT is NFTCore, NFTRoyalty {
     }
 }
 ```
+
+### NFTEnumerable
+Full token enumeration support.
+
+**Features:**
+- On-chain token enumeration
+- Wallet inventory tracking
+- Total supply tracking
+
+**Usage:**
+```solidity
+import "./extensions/NFTEnumerable.sol";
+
+contract MyNFT is NFTCore, NFTEnumerable {
+    // Override _update, _increaseBalance, and supportsInterface
+    function _update(address to, uint256 tokenId, address auth) internal override(ERC721, ERC721Enumerable) returns (address) {
+        return super._update(to, tokenId, auth);
+    }
+    
+    function _increaseBalance(address account, uint128 value) internal override(ERC721, ERC721Enumerable) {
+        super._increaseBalance(account, value);
+    }
+    
+    function supportsInterface(bytes4 interfaceId) public view override(NFTCore, ERC721Enumerable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+    
+    // Override totalSupply to resolve conflict
+    function totalSupply() public view override(NFTCore, ERC721Enumerable) returns (uint256) {
+        return ERC721Enumerable.totalSupply();
+    }
+}
+```
+
