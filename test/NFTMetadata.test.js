@@ -93,4 +93,19 @@ describe("NFTMetadata", function () {
         .withArgs(1);
     });
   });
+
+  describe("Attribute Removal", function () {
+    it("Should remove attribute", async function () {
+      await nftMetadata.setAttribute(1, "color", "blue");
+      await nftMetadata.removeAttribute(1, "color");
+      expect(await nftMetadata.getAttribute(1, "color")).to.equal("");
+    });
+
+    it("Should emit AttributeRemoved event", async function () {
+      await nftMetadata.setAttribute(1, "size", "large");
+      await expect(nftMetadata.removeAttribute(1, "size"))
+        .to.emit(nftMetadata, "AttributeRemoved")
+        .withArgs(1, "size");
+    });
+  });
 });
