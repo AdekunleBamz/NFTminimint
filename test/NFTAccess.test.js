@@ -110,4 +110,28 @@ describe("NFTAccess", function () {
         .withArgs(true);
     });
   });
+
+  describe("Admin Management", function () {
+    it("Should add admin", async function () {
+      await nftAccess.setAdmin(addr1.address, true);
+      expect(await nftAccess.admins(addr1.address)).to.equal(true);
+    });
+
+    it("Should remove admin", async function () {
+      await nftAccess.setAdmin(addr1.address, true);
+      await nftAccess.setAdmin(addr1.address, false);
+      expect(await nftAccess.admins(addr1.address)).to.equal(false);
+    });
+
+    it("Should emit AdminUpdated event", async function () {
+      await expect(nftAccess.setAdmin(addr1.address, true))
+        .to.emit(nftAccess, "AdminUpdated")
+        .withArgs(addr1.address, true);
+    });
+
+    it("Should check if address is admin", async function () {
+      expect(await nftAccess.isAdmin(owner.address)).to.equal(true);
+      expect(await nftAccess.isAdmin(addr1.address)).to.equal(false);
+    });
+  });
 });
