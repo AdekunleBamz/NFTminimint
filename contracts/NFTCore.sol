@@ -34,6 +34,9 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     
     /// @dev Mapping from token ID to mint timestamp
     mapping(uint256 => uint256) public mintTimestamps;
+    
+    /// @dev Total tokens burned
+    uint256 private _burnedCount;
 
     /// @dev Emitted when token is minted
     event TokenMinted(address indexed to, uint256 indexed tokenId, address indexed minter);
