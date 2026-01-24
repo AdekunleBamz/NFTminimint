@@ -50,4 +50,24 @@ describe("NFTMetadata", function () {
         .withArgs("ipfs://new-uri");
     });
   });
+
+  describe("Token Attributes", function () {
+    it("Should set token attribute", async function () {
+      await nftMetadata.setAttribute(1, "color", "blue");
+      expect(await nftMetadata.getAttribute(1, "color")).to.equal("blue");
+    });
+
+    it("Should emit AttributeSet event", async function () {
+      await expect(nftMetadata.setAttribute(1, "rarity", "legendary"))
+        .to.emit(nftMetadata, "AttributeSet")
+        .withArgs(1, "rarity", "legendary");
+    });
+
+    it("Should get all attribute keys for token", async function () {
+      await nftMetadata.setAttribute(1, "color", "blue");
+      await nftMetadata.setAttribute(1, "size", "large");
+      const keys = await nftMetadata.getAttributeKeys(1);
+      expect(keys.length).to.equal(2);
+    });
+  });
 });
