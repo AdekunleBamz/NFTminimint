@@ -46,4 +46,24 @@ describe("Security Tests", function () {
       ).to.be.revertedWith("NFTAccess: Not admin");
     });
   });
+
+  describe("Zero Address Protection", function () {
+    it("Should reject zero address for mint recipient", async function () {
+      await expect(
+        nftCore.mint(ethers.ZeroAddress, "ipfs://test")
+      ).to.be.revertedWith("NFTCore: Zero address");
+    });
+
+    it("Should reject zero address for minter authorization", async function () {
+      await expect(
+        nftCore.authorizeMinter(ethers.ZeroAddress)
+      ).to.be.revertedWith("NFTCore: Zero address");
+    });
+
+    it("Should reject zero address for whitelist", async function () {
+      await expect(
+        nftAccess.addToWhitelist(ethers.ZeroAddress)
+      ).to.be.revertedWith("NFTAccess: Zero address");
+    });
+  });
 });
