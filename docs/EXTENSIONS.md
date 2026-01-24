@@ -253,6 +253,29 @@ contract MyNFT is ERC721, NFTTransferCooldown {
 }
 ```
 
+### NFTMetadataFreeze
+Permanently freezes metadata updates (useful for trust-minimized collections).
+
+**Features:**
+- One-way freeze switch
+- Guard helper for setters
+
+**Usage:**
+```solidity
+import "./extensions/NFTMetadataFreeze.sol";
+
+contract MyNFT is NFTCore, NFTMetadataFreeze {
+    function setBaseURI(string memory newBaseURI) external onlyOwner {
+        _requireMetadataNotFrozen();
+        // update base URI
+    }
+
+    function freezeMetadata() external onlyOwner {
+        _freezeMetadata();
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
