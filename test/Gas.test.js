@@ -48,4 +48,30 @@ describe("Gas Optimization Tests", function () {
       expect(batchReceipt.gasUsed).to.be.lt(totalIndividualGas);
     });
   });
+
+  describe("Large Batch Mints", function () {
+    it("Should handle 10 tokens in batch", async function () {
+      const uris = Array(10).fill(0).map((_, i) => `ipfs://uri${i}`);
+      const tx = await nftCore.batchMint(owner.address, uris);
+      const receipt = await tx.wait();
+      console.log("    Batch 10 gas:", receipt.gasUsed.toString());
+      expect(await nftCore.totalMinted()).to.equal(10);
+    });
+
+    it("Should handle 25 tokens in batch", async function () {
+      const uris = Array(25).fill(0).map((_, i) => `ipfs://uri${i}`);
+      const tx = await nftCore.batchMint(owner.address, uris);
+      const receipt = await tx.wait();
+      console.log("    Batch 25 gas:", receipt.gasUsed.toString());
+      expect(await nftCore.totalMinted()).to.equal(25);
+    });
+
+    it("Should handle 50 tokens in batch (max)", async function () {
+      const uris = Array(50).fill(0).map((_, i) => `ipfs://uri${i}`);
+      const tx = await nftCore.batchMint(owner.address, uris);
+      const receipt = await tx.wait();
+      console.log("    Batch 50 gas:", receipt.gasUsed.toString());
+      expect(await nftCore.totalMinted()).to.equal(50);
+    });
+  });
 });
