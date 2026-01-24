@@ -4,14 +4,14 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title NFTMetadata
+ * @title NFTMetadataV2
  * @dev Metadata management contract - DEPLOY SECOND
  * @author Adekunle Bamz
  * @notice Manages metadata attributes, freezing, and contract URI
  * 
  * DEPLOYMENT ORDER: 2nd
  * CONSTRUCTOR ARGS: 1
- *   - nftCore_ (address): Address of deployed NFTCore contract
+ *   - nftCore_ (address): Address of deployed NFTCoreV2 contract
  */
 
 interface INFTCore {
@@ -19,7 +19,7 @@ interface INFTCore {
     function ownerOf(uint256 tokenId) external view returns (address);
 }
 
-contract NFTMetadata is Ownable {
+contract NFTMetadataV2 is Ownable {
     
     /// @dev Reference to NFTCore contract
     INFTCore public nftCore;
@@ -62,20 +62,20 @@ contract NFTMetadata is Ownable {
      * @param nftCore_ Address of NFTCore contract
      */
     constructor(address nftCore_) Ownable(msg.sender) {
-        require(nftCore_ != address(0), "NFTMetadata: Zero address");
+        require(nftCore_ != address(0), "NFTMetadataV2: Zero address");
         nftCore = INFTCore(nftCore_);
     }
 
     // ============ MODIFIERS ============
 
     modifier whenNotFrozen() {
-        require(!metadataFrozen, "NFTMetadata: Metadata frozen");
+        require(!metadataFrozen, "NFTMetadataV2: Metadata frozen");
         _;
     }
 
     modifier whenTokenNotFrozen(uint256 tokenId) {
-        require(!metadataFrozen, "NFTMetadata: Metadata frozen");
-        require(!tokenMetadataFrozen[tokenId], "NFTMetadata: Token frozen");
+        require(!metadataFrozen, "NFTMetadataV2: Metadata frozen");
+        require(!tokenMetadataFrozen[tokenId], "NFTMetadataV2: Token frozen");
         _;
     }
 
@@ -86,7 +86,7 @@ contract NFTMetadata is Ownable {
      * @param newCore New NFTCore address
      */
     function setNFTCore(address newCore) external onlyOwner {
-        require(newCore != address(0), "NFTMetadata: Zero address");
+        require(newCore != address(0), "NFTMetadataV2: Zero address");
         nftCore = INFTCore(newCore);
         emit NFTCoreUpdated(newCore);
     }
@@ -113,7 +113,7 @@ contract NFTMetadata is Ownable {
      * @param tokenId Token to freeze
      */
     function freezeTokenMetadata(uint256 tokenId) external onlyOwner whenTokenNotFrozen(tokenId) {
-        require(nftCore.exists(tokenId), "NFTMetadata: Token doesn't exist");
+        require(nftCore.exists(tokenId), "NFTMetadataV2: Token doesn't exist");
         tokenMetadataFrozen[tokenId] = true;
         emit TokenMetadataFrozen(tokenId);
     }
@@ -131,8 +131,8 @@ contract NFTMetadata is Ownable {
         onlyOwner 
         whenTokenNotFrozen(tokenId) 
     {
-        require(nftCore.exists(tokenId), "NFTMetadata: Token doesn't exist");
-        require(bytes(key).length > 0, "NFTMetadata: Empty key");
+        require(nftCore.exists(tokenId), "NFTMetadataV2: Token doesn't exist");
+        require(bytes(key).length > 0, "NFTMetadataV2: Empty key");
         
         // Check if key exists
         bool keyExists = false;
@@ -162,11 +162,11 @@ contract NFTMetadata is Ownable {
         string[] memory keys, 
         string[] memory values
     ) external onlyOwner whenTokenNotFrozen(tokenId) {
-        require(nftCore.exists(tokenId), "NFTMetadata: Token doesn't exist");
-        require(keys.length == values.length, "NFTMetadata: Length mismatch");
+        require(nftCore.exists(tokenId), "NFTMetadataV2: Token doesn't exist");
+        require(keys.length == values.length, "NFTMetadataV2: Length mismatch");
         
         for (uint256 i = 0; i < keys.length; i++) {
-            require(bytes(keys[i]).length > 0, "NFTMetadata: Empty key");
+            require(bytes(keys[i]).length > 0, "NFTMetadataV2: Empty key");
             
             bool keyExists = false;
             for (uint256 j = 0; j < _attributeKeys[tokenId].length; j++) {
@@ -238,7 +238,7 @@ contract NFTMetadata is Ownable {
         onlyOwner 
         whenTokenNotFrozen(tokenId) 
     {
-        require(nftCore.exists(tokenId), "NFTMetadata: Token doesn't exist");
+        require(nftCore.exists(tokenId), "NFTMetadataV2: Token doesn't exist");
         delete _attributes[tokenId][key];
         emit AttributeRemoved(tokenId, key);
     }

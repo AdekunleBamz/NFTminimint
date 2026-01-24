@@ -5,14 +5,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 
 /**
- * @title NFTCollection
+ * @title NFTCollectionV2
  * @dev Collection management contract - DEPLOY FOURTH
  * @author Adekunle Bamz
  * @notice Manages supply limits, royalties, and collection info
  * 
  * DEPLOYMENT ORDER: 4th
  * CONSTRUCTOR ARGS: 2
- *   - nftCore_ (address): Address of deployed NFTCore contract
+ *   - nftCore_ (address): Address of deployed NFTCoreV2 contract
  *   - maxSupply_ (uint256): Maximum supply (0 = unlimited)
  */
 
@@ -21,7 +21,7 @@ interface INFTCoreCollection {
     function exists(uint256 tokenId) external view returns (bool);
 }
 
-contract NFTCollection is Ownable, IERC2981 {
+contract NFTCollectionV2 is Ownable, IERC2981 {
     
     /// @dev Reference to NFTCore contract
     INFTCoreCollection public nftCore;
@@ -80,7 +80,7 @@ contract NFTCollection is Ownable, IERC2981 {
      * @param maxSupply_ Maximum supply (0 = unlimited)
      */
     constructor(address nftCore_, uint256 maxSupply_) Ownable(msg.sender) {
-        require(nftCore_ != address(0), "NFTCollection: Zero address");
+        require(nftCore_ != address(0), "NFTCollectionV2: Zero address");
         nftCore = INFTCoreCollection(nftCore_);
         maxSupply = maxSupply_;
     }
@@ -92,7 +92,7 @@ contract NFTCollection is Ownable, IERC2981 {
      * @param newCore New NFTCore address
      */
     function setNFTCore(address newCore) external onlyOwner {
-        require(newCore != address(0), "NFTCollection: Zero address");
+        require(newCore != address(0), "NFTCollectionV2: Zero address");
         nftCore = INFTCoreCollection(newCore);
         emit NFTCoreUpdated(newCore);
     }
@@ -104,7 +104,7 @@ contract NFTCollection is Ownable, IERC2981 {
     function setMaxSupply(uint256 newMaxSupply) external onlyOwner {
         require(
             newMaxSupply == 0 || newMaxSupply >= nftCore.totalSupply(),
-            "NFTCollection: Below current supply"
+            "NFTCollectionV2: Below current supply"
         );
         maxSupply = newMaxSupply;
         emit MaxSupplySet(newMaxSupply);
@@ -138,7 +138,7 @@ contract NFTCollection is Ownable, IERC2981 {
      * @param bps Basis points (e.g., 250 = 2.5%)
      */
     function setDefaultRoyalty(address recipient, uint96 bps) external onlyOwner {
-        require(bps <= 10000, "NFTCollection: Royalty too high");
+        require(bps <= 10000, "NFTCollectionV2: Royalty too high");
         royaltyRecipient = recipient;
         royaltyBps = bps;
         emit DefaultRoyaltySet(recipient, bps);
@@ -151,8 +151,8 @@ contract NFTCollection is Ownable, IERC2981 {
      * @param bps Basis points
      */
     function setTokenRoyalty(uint256 tokenId, address recipient, uint96 bps) external onlyOwner {
-        require(nftCore.exists(tokenId), "NFTCollection: Token doesn't exist");
-        require(bps <= 10000, "NFTCollection: Royalty too high");
+        require(nftCore.exists(tokenId), "NFTCollectionV2: Token doesn't exist");
+        require(bps <= 10000, "NFTCollectionV2: Royalty too high");
         
         tokenRoyaltyRecipient[tokenId] = recipient;
         tokenRoyaltyBps[tokenId] = bps;

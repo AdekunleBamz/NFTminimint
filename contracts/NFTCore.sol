@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title NFTCore
+ * @title NFTCoreV2
  * @dev Base ERC721 contract - DEPLOY FIRST
  * @author Adekunle Bamz
  * @notice Core NFT functionality with minting and burning
@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  *   - name_ (string): Collection name
  *   - symbol_ (string): Collection symbol
  */
-contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ReentrancyGuard {
+contract NFTCoreV2 is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ReentrancyGuard {
     
     /// @dev Token ID counter
     uint256 private _tokenIdCounter;
@@ -69,7 +69,7 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     modifier onlyMinter() {
         require(
             authorizedMinters[msg.sender] || msg.sender == owner(),
-            "NFTCore: Not authorized minter"
+            "NFTCoreV2: Not authorized minter"
         );
         _;
     }
@@ -81,7 +81,7 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
      * @param minter Address to authorize
      */
     function authorizeMinter(address minter) external onlyOwner {
-        require(minter != address(0), "NFTCore: Zero address");
+        require(minter != address(0), "NFTCoreV2: Zero address");
         authorizedMinters[minter] = true;
         emit MinterUpdated(minter, true);
     }
@@ -104,7 +104,7 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
      * @return tokenId The minted token ID
      */
     function mint(address to, string memory uri) external onlyMinter nonReentrant returns (uint256) {
-        require(to != address(0), "NFTCore: Zero address");
+        require(to != address(0), "NFTCoreV2: Zero address");
         
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter++;
@@ -126,9 +126,9 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
      * @return startTokenId First minted token ID
      */
     function batchMint(address to, string[] memory uris) external onlyMinter nonReentrant returns (uint256) {
-        require(to != address(0), "NFTCore: Zero address");
-        require(uris.length > 0, "NFTCore: Empty URIs");
-        require(uris.length <= 50, "NFTCore: Max 50 per batch");
+        require(to != address(0), "NFTCoreV2: Zero address");
+        require(uris.length > 0, "NFTCoreV2: Empty URIs");
+        require(uris.length <= 50, "NFTCoreV2: Max 50 per batch");
         
         uint256 startTokenId = _tokenIdCounter;
         
@@ -165,7 +165,7 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
      * @param uri New URI
      */
     function setTokenURI(uint256 tokenId, string memory uri) external onlyOwner {
-        require(_ownerOf(tokenId) != address(0), "NFTCore: Token doesn't exist");
+        require(_ownerOf(tokenId) != address(0), "NFTCoreV2: Token doesn't exist");
         _setTokenURI(tokenId, uri);
         emit TokenURIUpdated(tokenId, uri);
     }
@@ -200,7 +200,7 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
      * @return timestamp Mint timestamp
      */
     function getTokenCreationInfo(uint256 tokenId) external view returns (address creator, uint256 timestamp) {
-        require(_ownerOf(tokenId) != address(0), "NFTCore: Token doesn't exist");
+        require(_ownerOf(tokenId) != address(0), "NFTCoreV2: Token doesn't exist");
         return (creators[tokenId], mintTimestamps[tokenId]);
     }
 

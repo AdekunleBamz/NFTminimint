@@ -21,11 +21,33 @@ A modular, fee-free NFT minting platform built with Solidity and Hardhat.
 
 | Contract | Purpose |
 |----------|---------|
-| NFTCore | Base ERC721 with minting/burning |
-| NFTMetadata | Custom attributes and metadata |
-| NFTAccess | Whitelist and access control |
-| NFTCollection | Supply limits and royalties |
-| NFTminimint | Main controller interface |
+| NFTCoreV2 | Base ERC721 with minting/burning |
+| NFTMetadataV2 | Custom attributes and metadata |
+| NFTAccessV2 | Whitelist and access control |
+| NFTCollectionV2 | Supply limits and royalties |
+| NFTminimintV2 | Main controller interface |
+
+## 🌐 Deployed Contracts (Base Mainnet)
+
+### V2 Contracts (Latest)
+
+| Contract | Address |
+|----------|---------|
+| NFTCoreV2 | [`0xDADADe844995d4A34FbA65A98E371a0eDA57BeC2`](https://basescan.org/address/0xDADADe844995d4A34FbA65A98E371a0eDA57BeC2) |
+| NFTMetadataV2 | [`0x107fCd5f1D4172E254564cf4D1Fd3ADa1B8Ea657`](https://basescan.org/address/0x107fCd5f1D4172E254564cf4D1Fd3ADa1B8Ea657) |
+| NFTAccessV2 | [`0x37d4E045861a48bf2f06944b93f0ce2691d220f6`](https://basescan.org/address/0x37d4E045861a48bf2f06944b93f0ce2691d220f6) |
+| NFTCollectionV2 | [`0x0972C25D2ee399AB1D71EdD7C64caD92Ed2DD29e`](https://basescan.org/address/0x0972C25D2ee399AB1D71EdD7C64caD92Ed2DD29e) |
+| NFTminimintV2 | [`0x790D7DCe41EFEB8d3fa99345556A38d23ada196E`](https://basescan.org/address/0x790D7DCe41EFEB8d3fa99345556A38d23ada196E) |
+
+### V1 Contracts (Legacy)
+
+| Contract | Address |
+|----------|---------|
+| NFTCore | [`0x73A44374Adb7cf99390A97Ab6DF7C272e3E1E612`](https://basescan.org/address/0x73A44374Adb7cf99390A97Ab6DF7C272e3E1E612) |
+| NFTMetadata | [`0x3ed5e52f08C1A4f805923E686dA0a28Ae5a2fe74`](https://basescan.org/address/0x3ed5e52f08C1A4f805923E686dA0a28Ae5a2fe74) |
+| NFTAccess | [`0xd32b5108df769d73dc3624d44bf20d0ba0c99fff`](https://basescan.org/address/0xd32b5108df769d73dc3624d44bf20d0ba0c99fff) |
+| NFTCollection | [`0xD2a7Eec2A4397BAB9398FEcBa860776C7614da0c`](https://basescan.org/address/0xD2a7Eec2A4397BAB9398FEcBa860776C7614da0c) |
+| NFTminimint | [`0xd6e3d8c95B4E23B1d58449B32d16a03643E4B2c0`](https://basescan.org/address/0xd6e3d8c95B4E23B1d58449B32d16a03643E4B2c0) |
 
 ## Installation
 
