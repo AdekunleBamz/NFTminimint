@@ -462,3 +462,22 @@ contract MyNFT is ERC721, NFTBlacklist {
 2. **Test thoroughly** - Extensions may interact unexpectedly
 3. **Check gas costs** - More extensions = higher gas
 4. **Review security** - Some extensions add attack surface
+
+### NFTMaxSupplyChange
+Dynamic supply reduction.
+
+**Features:**
+- Reduce max supply
+- Prevent supply increase
+- Safety validation
+
+**Usage:**
+```solidity
+import "./extensions/NFTMaxSupplyChange.sol";
+
+contract MyNFT is NFTCore, NFTMaxSupplyChange {
+    function reduceMaxSupply(uint256 newMax) external onlyOwner {
+        _reduceMaxSupply(newMax);
+    }
+}
+```
