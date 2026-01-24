@@ -376,6 +376,29 @@ contract MyNFT is NFTCore, NFTSupplyBuffer {
 }
 ```
 
+### NFTWalletCap
+Caps the maximum number of tokens a wallet can mint/hold.
+
+**Features:**
+- Configurable max per wallet
+- Guard helper for mint flows
+
+**Usage:**
+```solidity
+import "./extensions/NFTWalletCap.sol";
+
+contract MyNFT is NFTCore, NFTWalletCap {
+    function setMaxPerWallet(uint256 maxPerWallet) external onlyOwner {
+        _setMaxPerWallet(maxPerWallet);
+    }
+
+    function mint(uint256 quantity) external {
+        _checkWalletCap(balanceOf(msg.sender), quantity);
+        // mint `quantity` tokens
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
