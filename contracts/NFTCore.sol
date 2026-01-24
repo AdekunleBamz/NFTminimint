@@ -161,6 +161,7 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     function setTokenURI(uint256 tokenId, string memory uri) external onlyOwner {
         require(_ownerOf(tokenId) != address(0), "NFTCore: Token doesn't exist");
         _setTokenURI(tokenId, uri);
+        emit TokenURIUpdated(tokenId, uri);
     }
 
     // ============ VIEW FUNCTIONS ============
