@@ -138,4 +138,17 @@ describe("NFTminimint Integration", function () {
       expect(await nftCore.totalMinted()).to.equal(2);
     });
   });
+
+  describe("Metadata Integration", function () {
+    it("Should set and get token attributes via NFTMetadata", async function () {
+      await nftMinimint.mint("ipfs://meta1");
+      await nftMetadata.setAttribute(1, "rarity", "legendary");
+      expect(await nftMetadata.getAttribute(1, "rarity")).to.equal("legendary");
+    });
+
+    it("Should set contract URI", async function () {
+      await nftMetadata.setContractURI("ipfs://collection-metadata");
+      expect(await nftMetadata.contractURI()).to.equal("ipfs://collection-metadata");
+    });
+  });
 });
