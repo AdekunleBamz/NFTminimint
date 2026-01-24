@@ -115,4 +115,24 @@ describe("NFTCore", function () {
         .to.be.revertedWith("NFTCore: Not authorized minter");
     });
   });
+
+  describe("Token URI Management", function () {
+    it("Should return correct token URI", async function () {
+      await nftCore.mint(owner.address, "ipfs://test-uri");
+      expect(await nftCore.tokenURI(0)).to.equal("ipfs://test-uri");
+    });
+
+    it("Should update token URI", async function () {
+      await nftCore.mint(owner.address, "ipfs://old-uri");
+      await nftCore.setTokenURI(0, "ipfs://new-uri");
+      expect(await nftCore.tokenURI(0)).to.equal("ipfs://new-uri");
+    });
+
+    it("Should emit TokenURIUpdated event", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      await expect(nftCore.setTokenURI(0, "ipfs://updated"))
+        .to.emit(nftCore, "TokenURIUpdated")
+        .withArgs(0, "ipfs://updated");
+    });
+  });
 });
