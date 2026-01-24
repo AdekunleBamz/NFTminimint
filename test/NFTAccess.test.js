@@ -58,5 +58,18 @@ describe("NFTAccess", function () {
       await nftAccess.batchAddToWhitelist([addr1.address, addr2.address]);
       expect(await nftAccess.whitelistCount()).to.equal(2);
     });
+
+    it("Should emit AddedToWhitelist event", async function () {
+      await expect(nftAccess.addToWhitelist(addr1.address))
+        .to.emit(nftAccess, "AddedToWhitelist")
+        .withArgs(addr1.address);
+    });
+
+    it("Should emit RemovedFromWhitelist event", async function () {
+      await nftAccess.addToWhitelist(addr1.address);
+      await expect(nftAccess.removeFromWhitelist(addr1.address))
+        .to.emit(nftAccess, "RemovedFromWhitelist")
+        .withArgs(addr1.address);
+    });
   });
 });
