@@ -101,4 +101,19 @@ describe("NFTminimint Integration", function () {
       expect(await nftCore.ownerOf(2)).to.equal(owner.address);
     });
   });
+
+  describe("Airdrop", function () {
+    it("Should airdrop to multiple recipients", async function () {
+      const recipients = [addr1.address, addr2.address];
+      const uris = ["ipfs://air1", "ipfs://air2"];
+      await nftMinimint.airdrop(recipients, uris);
+      expect(await nftCore.ownerOf(1)).to.equal(addr1.address);
+      expect(await nftCore.ownerOf(2)).to.equal(addr2.address);
+    });
+
+    it("Should emit Airdropped event", async function () {
+      await expect(nftMinimint.airdrop([addr1.address], ["ipfs://drop1"]))
+        .to.emit(nftMinimint, "Airdropped");
+    });
+  });
 });
