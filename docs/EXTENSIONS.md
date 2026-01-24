@@ -276,6 +276,29 @@ contract MyNFT is NFTCore, NFTMetadataFreeze {
 }
 ```
 
+### NFTBatchMintLimit
+Restricts the maximum number of tokens that can be minted in a single batch.
+
+**Features:**
+- Configurable max batch size
+- Guard helper for batch mint flows
+
+**Usage:**
+```solidity
+import "./extensions/NFTBatchMintLimit.sol";
+
+contract MyNFT is NFTCore, NFTBatchMintLimit {
+    function setMaxBatch(uint256 maxBatch) external onlyOwner {
+        _setMaxBatchMint(maxBatch);
+    }
+
+    function batchMint(uint256 quantity) external {
+        _checkBatchMint(quantity);
+        // mint `quantity` tokens
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
