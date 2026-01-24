@@ -188,6 +188,17 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     }
 
     /**
+     * @notice Get token creation info
+     * @param tokenId Token to query
+     * @return creator Original minter
+     * @return timestamp Mint timestamp
+     */
+    function getTokenCreationInfo(uint256 tokenId) external view returns (address creator, uint256 timestamp) {
+        require(_ownerOf(tokenId) != address(0), "NFTCore: Token doesn't exist");
+        return (creators[tokenId], mintTimestamps[tokenId]);
+    }
+
+    /**
      * @notice Get tokens owned by address
      */
     function tokensOfOwner(address owner_) external view returns (uint256[] memory) {
