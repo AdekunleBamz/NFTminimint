@@ -91,4 +91,23 @@ describe("NFTAccess", function () {
       expect(await nftAccess.mintedPerWallet(addr1.address)).to.equal(2);
     });
   });
+
+  describe("Public Mint", function () {
+    it("Should open public mint", async function () {
+      await nftAccess.setPublicMintOpen(true);
+      expect(await nftAccess.publicMintOpen()).to.equal(true);
+    });
+
+    it("Should close public mint", async function () {
+      await nftAccess.setPublicMintOpen(true);
+      await nftAccess.setPublicMintOpen(false);
+      expect(await nftAccess.publicMintOpen()).to.equal(false);
+    });
+
+    it("Should emit PublicMintStatusChanged event", async function () {
+      await expect(nftAccess.setPublicMintOpen(true))
+        .to.emit(nftAccess, "PublicMintStatusChanged")
+        .withArgs(true);
+    });
+  });
 });
