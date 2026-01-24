@@ -28,6 +28,6 @@ contract MockNFTPermit is ERC721, NFTPermit {
     }
     
     function _approvePermit(address spender, uint256 tokenId) internal override {
-        _approve(spender, tokenId);
+        _approve(spender, tokenId, _ownerOf(tokenId));
     }
 }
