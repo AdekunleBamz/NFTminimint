@@ -71,6 +71,9 @@ contract NFTAccess is Ownable, Pausable {
     
     /// @dev Emitted when NFTCore reference updates
     event NFTCoreUpdated(address indexed newCore);
+    
+    /// @dev Emitted when mint is recorded
+    event MintRecorded(address indexed wallet, uint256 count);
 
     /**
      * @dev Constructor
