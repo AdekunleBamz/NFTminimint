@@ -84,4 +84,21 @@ describe("NFTCollection", function () {
       expect(info.amount).to.equal(250);
     });
   });
+
+  describe("Supply Management", function () {
+    it("Should check if amount can be minted", async function () {
+      expect(await nftCollection.canMintAmount(100)).to.equal(true);
+      expect(await nftCollection.canMintAmount(10001)).to.equal(false);
+    });
+
+    it("Should get remaining supply", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      expect(await nftCollection.remainingSupply()).to.equal(999);
+    });
+
+    it("Should allow updating max supply", async function () {
+      await nftCollection.setMaxSupply(5000);
+      expect(await nftCollection.maxSupply()).to.equal(5000);
+    });
+  });
 });
