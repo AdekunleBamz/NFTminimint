@@ -22,16 +22,8 @@ contract MockNFTStaking is NFTCore, NFTStaking {
     }
 
     function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
-        if (tokenId != 0 && _ownerOf(tokenId) != address(0)) { // Existing token
-            // If minting (from=0), _ownerOf(tokenId) is usually 0 before update?
-            // Actually _update handles mint/burn/transfer.
-            // If transfer: from != 0, so _ownerOf is correct.
-            // If mint: from == 0.
-            // We only care if it's already staked.
-            // If minting, it can't be staked yet.
-            // If burning (to=0), maybe allow?
-            // Usually can't burn staked tokens without unstaking.
-            
+        // Check if token exists (not minting) and is staked
+        if (_ownerOf(tokenId) != address(0)) { 
             require(!isStaked(tokenId), "Token is staked");
         }
         return super._update(to, tokenId, auth);
