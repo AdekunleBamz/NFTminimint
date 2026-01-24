@@ -592,3 +592,30 @@ contract MyNFT is NFTCore, NFTStaking {
     }
 }
 ```
+
+### NFTReferral
+Referral tracking and reward accounting.
+
+**Features:**
+- Referral count tracking
+- Reward balance management
+- Claimable reward events
+
+**Usage:**
+```solidity
+import "./extensions/NFTReferral.sol";
+
+contract MyNFT is NFTCore, NFTReferral {
+    function mintWithReferral(address to, string memory uri, address referrer) external onlyOwner {
+        mint(to, uri);
+        if (referrer != address(0) && referrer != to) {
+            _recordReferral(referrer, to);
+            _addReward(referrer, 10);
+        }
+    }
+    
+    function claimReward(uint256 amount) external {
+        _claimReward(msg.sender, amount);
+    }
+}
+```
