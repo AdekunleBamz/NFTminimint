@@ -248,4 +248,11 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     function circulatingSupply() external view returns (uint256) {
         return _tokenIdCounter - _burnedCount;
     }
+
+    /**
+     * @notice Get total minted tokens
+     */
+    function totalMinted() external view returns (uint256) {
+        return _tokenIdCounter;
+    }
 }
