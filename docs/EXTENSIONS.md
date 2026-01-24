@@ -726,3 +726,27 @@ contract MyNFT is NFTCore, NFTProvenance {
     }
 }
 ```
+
+### NFTRandomMint
+Randomized token ID assignment.
+
+**Features:**
+- Fisher-Yates shuffle selection
+- Remaining supply tracking
+- Configurable max supply
+
+**Usage:**
+```solidity
+import "./extensions/NFTRandomMint.sol";
+
+contract MyNFT is NFTCore, NFTRandomMint {
+    function initializeRandomMint(uint256 maxSupply) external onlyOwner {
+        _initializeRandomMint(maxSupply);
+    }
+
+    function randomMint(address to, uint256 nonce) external onlyOwner {
+        uint256 tokenId = _getRandomTokenId(nonce);
+        // mint tokenId to user
+    }
+}
+```
