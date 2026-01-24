@@ -365,4 +365,33 @@ contract NFTAccess is Ownable, Pausable {
     function walletMintLimit() external view returns (uint256) {
         return maxMintsPerWallet;
     }
+
+    /**
+     * @notice Record mint for a wallet (alias for recordMint)
+     * @param wallet Address that minted
+     * @param count Number of mints
+     */
+    function recordMint(address wallet, uint256 count) external onlyAuthorized {
+        mintsPerWallet[wallet] += count;
+        emit MintRecorded(wallet, count);
+    }
+
+    /**
+     * @notice Get minted count per wallet
+     * @param wallet Address to check
+     */
+    function mintedPerWallet(address wallet) external view returns (uint256) {
+        return mintsPerWallet[wallet];
+    }
+
+    /**
+     * @notice Set admin status
+     * @param admin Address to update
+     * @param status New status
+     */
+    function setAdmin(address admin, bool status) external onlyOwner {
+        require(admin != address(0), "NFTAccess: Zero address");
+        admins[admin] = status;
+        emit AdminUpdated(admin, status);
+    }
 }
