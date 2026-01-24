@@ -50,3 +50,6 @@ frontend/dist/
 
 # Testing
 .nyc_output/
+
+# personal tools
+function/
