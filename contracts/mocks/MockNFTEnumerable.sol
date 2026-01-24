@@ -7,10 +7,6 @@ import "../NFTCore.sol";
 contract MockNFTEnumerable is NFTCore, NFTEnumerable {
     constructor() NFTCore("MockEnum", "MENUM") {}
 
-    function mint(address to) external {
-        _mint(to, 1); // This calls NFTCore._mint -> ERC721._mint -> _update
-    }
-
     // Overrides required by Solidity
 
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721, ERC721Enumerable) returns (address) {
