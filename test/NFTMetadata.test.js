@@ -108,4 +108,21 @@ describe("NFTMetadata", function () {
         .withArgs(1, "size");
     });
   });
+
+  describe("Multiple Attributes", function () {
+    it("Should handle multiple attributes per token", async function () {
+      await nftMetadata.setAttribute(1, "color", "blue");
+      await nftMetadata.setAttribute(1, "size", "large");
+      await nftMetadata.setAttribute(1, "rarity", "epic");
+      
+      const keys = await nftMetadata.getAttributeKeys(1);
+      expect(keys.length).to.equal(3);
+    });
+
+    it("Should overwrite existing attribute", async function () {
+      await nftMetadata.setAttribute(1, "color", "blue");
+      await nftMetadata.setAttribute(1, "color", "red");
+      expect(await nftMetadata.getAttribute(1, "color")).to.equal("red");
+    });
+  });
 });
