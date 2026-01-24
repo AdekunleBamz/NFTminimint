@@ -154,4 +154,23 @@ describe("NFTAccess", function () {
       expect(reason).to.equal("Minting paused");
     });
   });
+
+  describe("Caller Authorization", function () {
+    it("Should authorize a caller", async function () {
+      await nftAccess.authorizeCaller(addr1.address);
+      expect(await nftAccess.authorizedCallers(addr1.address)).to.equal(true);
+    });
+
+    it("Should revoke caller authorization", async function () {
+      await nftAccess.authorizeCaller(addr1.address);
+      await nftAccess.revokeCaller(addr1.address);
+      expect(await nftAccess.authorizedCallers(addr1.address)).to.equal(false);
+    });
+
+    it("Should emit AuthorizedCallerUpdated event", async function () {
+      await expect(nftAccess.authorizeCaller(addr1.address))
+        .to.emit(nftAccess, "AuthorizedCallerUpdated")
+        .withArgs(addr1.address, true);
+    });
+  });
 });
