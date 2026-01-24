@@ -66,4 +66,27 @@ describe("Security Tests", function () {
       ).to.be.revertedWith("NFTAccess: Zero address");
     });
   });
+
+  describe("Pause Functionality", function () {
+    it("Should block operations when paused", async function () {
+      await nftAccess.pause();
+      const [canMint, reason] = await nftAccess.canMint(user.address);
+      expect(canMint).to.equal(false);
+      expect(reason).to.equal("Minting paused");
+    });
+
+    it("Should allow operations when unpaused", async function () {
+      await nftAccess.pause();
+      await nftAccess.unpause();
+      await nftAccess.setPublicMintOpen(true);
+      const [canMint] = await nftAccess.canMint(user.address);
+      expect(canMint).to.equal(true);
+    });
+
+    it("Should prevent non-admin from pausing", async function () {
+      await expect(
+        nftAccess.connect(attacker).pause()
+      ).to.be.revertedWith("NFTAccess: Not admin");
+    });
+  });
 });
