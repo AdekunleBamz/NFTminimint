@@ -5,21 +5,21 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title NFTminimint
+ * @title NFTminimintV2
  * @dev Main controller contract - DEPLOY FIFTH (LAST)
  * @author Adekunle Bamz
  * @notice Main minting interface that connects all contracts - FREE MINTING!
  * 
  * DEPLOYMENT ORDER: 5th (Last)
  * CONSTRUCTOR ARGS: 4
- *   - nftCore_ (address): Address of deployed NFTCore contract
- *   - nftMetadata_ (address): Address of deployed NFTMetadata contract
- *   - nftAccess_ (address): Address of deployed NFTAccess contract
- *   - nftCollection_ (address): Address of deployed NFTCollection contract
+ *   - nftCore_ (address): Address of deployed NFTCoreV2 contract
+ *   - nftMetadata_ (address): Address of deployed NFTMetadataV2 contract
+ *   - nftAccess_ (address): Address of deployed NFTAccessV2 contract
+ *   - nftCollection_ (address): Address of deployed NFTCollectionV2 contract
  * 
  * AFTER DEPLOYMENT - LINKING STEPS:
- *   1. Call NFTCore.authorizeMinter(NFTminimint address)
- *   2. Call NFTAccess.authorizeCaller(NFTminimint address)
+ *   1. Call NFTCoreV2.authorizeMinter(NFTminimintV2 address)
+ *   2. Call NFTAccessV2.authorizeCaller(NFTminimintV2 address)
  */
 
 interface INFTCoreMain {
@@ -50,7 +50,7 @@ interface INFTCollectionMain {
     function getStats() external view returns (uint256, uint256, uint256);
 }
 
-contract NFTminimint is Ownable, ReentrancyGuard {
+contract NFTminimintV2 is Ownable, ReentrancyGuard {
     
     /// @dev Version
     string public constant VERSION = "2.0.0";
@@ -92,10 +92,10 @@ contract NFTminimint is Ownable, ReentrancyGuard {
         address nftAccess_,
         address nftCollection_
     ) Ownable(msg.sender) {
-        require(nftCore_ != address(0), "NFTminimint: Zero core address");
-        require(nftMetadata_ != address(0), "NFTminimint: Zero metadata address");
-        require(nftAccess_ != address(0), "NFTminimint: Zero access address");
-        require(nftCollection_ != address(0), "NFTminimint: Zero collection address");
+        require(nftCore_ != address(0), "NFTminimintV2: Zero core address");
+        require(nftMetadata_ != address(0), "NFTminimintV2: Zero metadata address");
+        require(nftAccess_ != address(0), "NFTminimintV2: Zero access address");
+        require(nftCollection_ != address(0), "NFTminimintV2: Zero collection address");
         
         nftCore = INFTCoreMain(nftCore_);
         nftMetadata = nftMetadata_;
@@ -112,7 +112,7 @@ contract NFTminimint is Ownable, ReentrancyGuard {
     }
 
     modifier withinSupply(uint256 quantity) {
-        require(nftCollection.canMintQuantity(quantity), "NFTminimint: Exceeds max supply");
+        require(nftCollection.canMintQuantity(quantity), "NFTminimintV2: Exceeds max supply");
         _;
     }
 
@@ -169,12 +169,12 @@ contract NFTminimint is Ownable, ReentrancyGuard {
         withinSupply(uris.length) 
         returns (uint256) 
     {
-        require(uris.length > 0, "NFTminimint: Empty URIs");
-        require(uris.length <= 50, "NFTminimint: Max 50 per batch");
+        require(uris.length > 0, "NFTminimintV2: Empty URIs");
+        require(uris.length <= 50, "NFTminimintV2: Max 50 per batch");
         
         // Check wallet limit
         uint256 remaining = nftAccess.remainingMints(msg.sender);
-        require(uris.length <= remaining, "NFTminimint: Exceeds wallet limit");
+        require(uris.length <= remaining, "NFTminimintV2: Exceeds wallet limit");
         
         uint256 startTokenId = nftCore.batchMint(msg.sender, uris);
         nftAccess.recordMints(msg.sender, uris.length);
@@ -195,11 +195,11 @@ contract NFTminimint is Ownable, ReentrancyGuard {
         onlyOwner 
         withinSupply(recipients.length) 
     {
-        require(recipients.length > 0, "NFTminimint: No recipients");
-        require(recipients.length <= 100, "NFTminimint: Max 100 per airdrop");
+        require(recipients.length > 0, "NFTminimintV2: No recipients");
+        require(recipients.length <= 100, "NFTminimintV2: Max 100 per airdrop");
         
         for (uint256 i = 0; i < recipients.length; i++) {
-            require(recipients[i] != address(0), "NFTminimint: Zero address");
+            require(recipients[i] != address(0), "NFTminimintV2: Zero address");
             nftCore.mint(recipients[i], uri);
         }
         
@@ -216,12 +216,12 @@ contract NFTminimint is Ownable, ReentrancyGuard {
         onlyOwner 
         withinSupply(recipients.length) 
     {
-        require(recipients.length > 0, "NFTminimint: No recipients");
-        require(recipients.length == uris.length, "NFTminimint: Length mismatch");
-        require(recipients.length <= 100, "NFTminimint: Max 100 per airdrop");
+        require(recipients.length > 0, "NFTminimintV2: No recipients");
+        require(recipients.length == uris.length, "NFTminimintV2: Length mismatch");
+        require(recipients.length <= 100, "NFTminimintV2: Max 100 per airdrop");
         
         for (uint256 i = 0; i < recipients.length; i++) {
-            require(recipients[i] != address(0), "NFTminimint: Zero address");
+            require(recipients[i] != address(0), "NFTminimintV2: Zero address");
             nftCore.mint(recipients[i], uris[i]);
         }
         
@@ -243,10 +243,10 @@ contract NFTminimint is Ownable, ReentrancyGuard {
         address nftAccess_,
         address nftCollection_
     ) external onlyOwner {
-        require(nftCore_ != address(0), "NFTminimint: Zero core address");
-        require(nftMetadata_ != address(0), "NFTminimint: Zero metadata address");
-        require(nftAccess_ != address(0), "NFTminimint: Zero access address");
-        require(nftCollection_ != address(0), "NFTminimint: Zero collection address");
+        require(nftCore_ != address(0), "NFTminimintV2: Zero core address");
+        require(nftMetadata_ != address(0), "NFTminimintV2: Zero metadata address");
+        require(nftAccess_ != address(0), "NFTminimintV2: Zero access address");
+        require(nftCollection_ != address(0), "NFTminimintV2: Zero collection address");
         
         nftCore = INFTCoreMain(nftCore_);
         nftMetadata = nftMetadata_;
@@ -328,7 +328,7 @@ contract NFTminimint is Ownable, ReentrancyGuard {
         address creator,
         uint256 mintTime
     ) {
-        require(nftCore.exists(tokenId), "NFTminimint: Token doesn't exist");
+        require(nftCore.exists(tokenId), "NFTminimintV2: Token doesn't exist");
         
         owner_ = nftCore.ownerOf(tokenId);
         uri = nftCore.tokenURI(tokenId);

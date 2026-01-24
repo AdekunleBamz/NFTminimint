@@ -5,21 +5,21 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
- * @title NFTAccess
+ * @title NFTAccessV2
  * @dev Access control contract - DEPLOY THIRD
  * @author Adekunle Bamz
  * @notice Manages whitelist, mint limits, and pause functionality
  * 
  * DEPLOYMENT ORDER: 3rd
  * CONSTRUCTOR ARGS: 1
- *   - nftCore_ (address): Address of deployed NFTCore contract
+ *   - nftCore_ (address): Address of deployed NFTCoreV2 contract
  */
 
 interface INFTCoreAccess {
     function totalSupply() external view returns (uint256);
 }
 
-contract NFTAccess is Ownable, Pausable {
+contract NFTAccessV2 is Ownable, Pausable {
     
     /// @dev Reference to NFTCore contract
     INFTCoreAccess public nftCore;
@@ -80,7 +80,7 @@ contract NFTAccess is Ownable, Pausable {
      * @param nftCore_ Address of NFTCore contract
      */
     constructor(address nftCore_) Ownable(msg.sender) {
-        require(nftCore_ != address(0), "NFTAccess: Zero address");
+        require(nftCore_ != address(0), "NFTAccessV2: Zero address");
         nftCore = INFTCoreAccess(nftCore_);
         admins[msg.sender] = true;
     }
@@ -88,14 +88,14 @@ contract NFTAccess is Ownable, Pausable {
     // ============ MODIFIERS ============
 
     modifier onlyAdmin() {
-        require(admins[msg.sender] || msg.sender == owner(), "NFTAccess: Not admin");
+        require(admins[msg.sender] || msg.sender == owner(), "NFTAccessV2: Not admin");
         _;
     }
     
     modifier onlyAuthorized() {
         require(
             authorizedCallers[msg.sender] || admins[msg.sender] || msg.sender == owner(),
-            "NFTAccess: Not authorized"
+            "NFTAccessV2: Not authorized"
         );
         _;
     }
@@ -107,7 +107,7 @@ contract NFTAccess is Ownable, Pausable {
      * @param admin Address to add
      */
     function addAdmin(address admin) external onlyOwner {
-        require(admin != address(0), "NFTAccess: Zero address");
+        require(admin != address(0), "NFTAccessV2: Zero address");
         admins[admin] = true;
         emit AdminUpdated(admin, true);
     }
@@ -126,7 +126,7 @@ contract NFTAccess is Ownable, Pausable {
      * @param caller Address to authorize
      */
     function authorizeCaller(address caller) external onlyOwner {
-        require(caller != address(0), "NFTAccess: Zero address");
+        require(caller != address(0), "NFTAccessV2: Zero address");
         authorizedCallers[caller] = true;
         emit AuthorizedCallerUpdated(caller, true);
     }
@@ -145,7 +145,7 @@ contract NFTAccess is Ownable, Pausable {
      * @param newCore New NFTCore address
      */
     function setNFTCore(address newCore) external onlyOwner {
-        require(newCore != address(0), "NFTAccess: Zero address");
+        require(newCore != address(0), "NFTAccessV2: Zero address");
         nftCore = INFTCoreAccess(newCore);
         emit NFTCoreUpdated(newCore);
     }
@@ -157,7 +157,7 @@ contract NFTAccess is Ownable, Pausable {
      * @param account Address to add
      */
     function addToWhitelist(address account) external onlyAdmin {
-        require(account != address(0), "NFTAccess: Zero address");
+        require(account != address(0), "NFTAccessV2: Zero address");
         if (!whitelist[account]) {
             whitelist[account] = true;
             whitelistCount++;
@@ -390,7 +390,7 @@ contract NFTAccess is Ownable, Pausable {
      * @param status New status
      */
     function setAdmin(address admin, bool status) external onlyOwner {
-        require(admin != address(0), "NFTAccess: Zero address");
+        require(admin != address(0), "NFTAccessV2: Zero address");
         admins[admin] = status;
         emit AdminUpdated(admin, status);
     }
