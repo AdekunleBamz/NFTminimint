@@ -299,6 +299,30 @@ contract MyNFT is NFTCore, NFTBatchMintLimit {
 }
 ```
 
+### NFTMintCooldown
+Enforces a minimum time interval between mints for the same wallet.
+
+**Features:**
+- Global cooldown seconds
+- Per-wallet last mint timestamp
+
+**Usage:**
+```solidity
+import "./extensions/NFTMintCooldown.sol";
+
+contract MyNFT is NFTCore, NFTMintCooldown {
+    function setMintCooldown(uint256 seconds_) external onlyOwner {
+        _setMintCooldown(seconds_);
+    }
+
+    function mint() external {
+        _checkMintCooldown(msg.sender);
+        // mint token
+        _recordMintCooldown(msg.sender);
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
