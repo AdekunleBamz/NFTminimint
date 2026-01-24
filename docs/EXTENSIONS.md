@@ -644,3 +644,31 @@ contract MyNFT is NFTCore, NFTLazyMint {
     }
 }
 ```
+
+### NFTCrosschain
+Cross-chain bridge request tracking.
+
+**Features:**
+- Destination chain allowlist
+- Bridge request creation and processing
+- Token lock during bridging
+
+**Usage:**
+```solidity
+import "./extensions/NFTCrosschain.sol";
+
+contract MyNFT is NFTCore, NFTCrosschain {
+    function setBridgeOperator(address operator) external onlyOwner {
+        _setBridgeOperator(operator);
+    }
+
+    function setSupportedChain(uint256 chainId, bool supported) external onlyOwner {
+        _setSupportedChain(chainId, supported);
+    }
+
+    function requestBridge(uint256 tokenId, uint256 destinationChainId) external {
+        require(ownerOf(tokenId) == msg.sender, "Not owner");
+        _createBridgeRequest(tokenId, msg.sender, destinationChainId);
+    }
+}
+```
