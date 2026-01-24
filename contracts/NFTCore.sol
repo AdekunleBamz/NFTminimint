@@ -43,6 +43,9 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     
     /// @dev Emitted when base URI changes
     event BaseURIUpdated(string newBaseURI);
+    
+    /// @dev Emitted when token URI is updated
+    event TokenURIUpdated(uint256 indexed tokenId, string newURI);
 
     /**
      * @dev Constructor
