@@ -70,4 +70,27 @@ describe("NFTMetadata", function () {
       expect(keys.length).to.equal(2);
     });
   });
+
+  describe("Metadata Freezing", function () {
+    it("Should freeze global metadata", async function () {
+      await nftMetadata.freezeMetadata();
+      expect(await nftMetadata.metadataFrozen()).to.equal(true);
+    });
+
+    it("Should emit MetadataFrozen event", async function () {
+      await expect(nftMetadata.freezeMetadata())
+        .to.emit(nftMetadata, "MetadataFrozen");
+    });
+
+    it("Should freeze individual token metadata", async function () {
+      await nftMetadata.freezeTokenMetadata(1);
+      expect(await nftMetadata.tokenMetadataFrozen(1)).to.equal(true);
+    });
+
+    it("Should emit TokenMetadataFrozen event", async function () {
+      await expect(nftMetadata.freezeTokenMetadata(1))
+        .to.emit(nftMetadata, "TokenMetadataFrozen")
+        .withArgs(1);
+    });
+  });
 });
