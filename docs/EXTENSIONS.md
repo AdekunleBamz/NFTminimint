@@ -560,3 +560,35 @@ contract MyNFT is NFTCore, NFTEnumerable {
 }
 ```
 
+
+### NFTStaking
+Native token staking support.
+
+**Features:**
+- On-chain staking mechanism
+- Transfer protection for staked tokens
+- Staking history and duration
+
+**Usage:**
+```solidity
+import "./extensions/NFTStaking.sol";
+
+contract MyNFT is NFTCore, NFTStaking {
+    function stake(uint256 tokenId) external {
+        require(ownerOf(tokenId) == msg.sender, "Not owner");
+        _stake(tokenId, msg.sender);
+    }
+    
+    function unstake(uint256 tokenId) external {
+        require(stakes[tokenId].staker == msg.sender, "Not staker");
+        _unstake(tokenId);
+    }
+    
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
+        if (_ownerOf(tokenId) != address(0)) {
+            require(!isStaked(tokenId), "Token is staked");
+        }
+        return super._update(to, tokenId, auth);
+    }
+}
+```
