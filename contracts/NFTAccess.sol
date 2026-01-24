@@ -320,4 +320,30 @@ contract NFTAccess is Ownable, Pausable {
     function isWhitelisted(address account) external view returns (bool) {
         return whitelist[account];
     }
+
+    /**
+     * @notice Check if address is admin
+     * @param account Address to check
+     */
+    function isAdmin(address account) external view returns (bool) {
+        return admins[account];
+    }
+
+    /**
+     * @notice Get mint statistics for a wallet
+     * @param wallet Address to check
+     */
+    function getMintStats(address wallet) external view returns (
+        uint256 minted,
+        uint256 remaining,
+        uint256 limit
+    ) {
+        minted = mintsPerWallet[wallet];
+        limit = maxMintsPerWallet;
+        if (limit == 0) {
+            remaining = type(uint256).max;
+        } else {
+            remaining = minted >= limit ? 0 : limit - minted;
+        }
+    }
 }
