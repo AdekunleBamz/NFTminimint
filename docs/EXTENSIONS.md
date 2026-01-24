@@ -481,3 +481,24 @@ contract MyNFT is NFTCore, NFTMaxSupplyChange {
     }
 }
 ```
+
+### NFTFreeMint
+Claimable free mints for specific users.
+
+**Features:**
+- Allowlist for free mints
+- Cap per wallet
+- Global enable/disable switch
+
+**Usage:**
+```solidity
+import "./extensions/NFTFreeMint.sol";
+
+contract MyNFT is NFTCore, NFTFreeMint {
+    function setFreeList(address[] calldata users, bool status) external onlyOwner {
+        for(uint i=0; i<users.length; i++) {
+            _setFreeMintAccess(users[i], status);
+        }
+    }
+}
+```
