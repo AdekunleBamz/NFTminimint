@@ -1,0 +1,8 @@
+{
+  "spec": "test/**/*.test.js",
+  "timeout": 60000,
+  "reporter": "spec",
+  "require": ["hardhat/register"],
+  "exit": true,
+  "parallel": false
+}
