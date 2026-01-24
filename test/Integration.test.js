@@ -116,4 +116,26 @@ describe("NFTminimint Integration", function () {
         .to.emit(nftMinimint, "Airdropped");
     });
   });
+
+  describe("Access Control Integration", function () {
+    it("Should enforce whitelist when enabled", async function () {
+      await nftAccess.setPublicMintOpen(false);
+      await nftAccess.setWhitelistEnabled(true);
+      await nftAccess.addToWhitelist(addr1.address);
+      
+      // addr1 can mint (whitelisted)
+      await nftMinimint.connect(addr1).mint("ipfs://wl1");
+      expect(await nftCore.ownerOf(1)).to.equal(addr1.address);
+    });
+
+    it("Should enforce wallet mint limits", async function () {
+      await nftAccess.setWalletMintLimit(2);
+      
+      // Mint 2 (should work)
+      await nftMinimint.mint("ipfs://limit1");
+      await nftMinimint.mint("ipfs://limit2");
+      
+      expect(await nftCore.totalMinted()).to.equal(2);
+    });
+  });
 });
