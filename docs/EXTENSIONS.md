@@ -140,6 +140,57 @@ contract MyNFT is NFTCore, NFTStaking {
 }
 ```
 
+### NFTGated
+Token-gated access and feature unlocking.
+
+**Features:**
+- Feature registry with min token requirements
+- Time-based access windows
+- Access logging
+
+**Usage:**
+```solidity
+import "./extensions/NFTGated.sol";
+
+contract MyNFT is NFTCore, NFTGated {
+    function createFeature(string memory name, uint256 minTokens) external onlyOwner {
+        _createFeature(name, minTokens, block.timestamp, 0);
+    }
+    
+    function access(bytes32 featureId) external {
+        require(_canAccessFeature(featureId, balanceOf(msg.sender)), "Access denied");
+        _recordAccess(featureId, msg.sender);
+    }
+}
+```
+
+### NFTPermit
+Signature-based approvals (EIP-4494).
+
+**Features:**
+- Off-chain approvals via signatures
+- Nonce replay protection
+- EIP-712 domain separation
+
+**Usage:**
+```solidity
+import "./extensions/NFTPermit.sol";
+
+contract MyNFT is NFTCore, NFTPermit {
+    constructor(string memory name_, string memory symbol_) NFTCore(name_, symbol_) {
+        _initPermit(name_);
+    }
+    
+    function _ownerOfPermit(uint256 tokenId) internal view override returns (address) {
+        return _ownerOf(tokenId);
+    }
+    
+    function _approvePermit(address spender, uint256 tokenId) internal override {
+        _approve(spender, tokenId);
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
