@@ -1,233 +1,318 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./NFTMetadata.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title NFTAccess
- * @dev Role-based access control and security features
+ * @dev Access control contract - DEPLOY THIRD
  * @author Adekunle Bamz
- * @notice Manages roles, whitelist, mint limits, and pausability
+ * @notice Manages whitelist, mint limits, and pause functionality
+ * 
+ * DEPLOYMENT ORDER: 3rd
+ * CONSTRUCTOR ARGS: 1
+ *   - nftCore_ (address): Address of deployed NFTCore contract
  */
-abstract contract NFTAccess is NFTMetadata, AccessControl, Pausable {
+
+interface INFTCoreAccess {
+    function totalSupply() external view returns (uint256);
+}
+
+contract NFTAccess is Ownable, Pausable {
     
-    /// @dev Role for administrators
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    
-    /// @dev Role for minters (can mint without whitelist)
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    
-    /// @dev Role for pausers (can pause/unpause)
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    /// @dev Reference to NFTCore contract
+    INFTCoreAccess public nftCore;
     
     /// @dev Whitelist mapping
-    mapping(address => bool) internal _whitelist;
+    mapping(address => bool) public whitelist;
     
-    /// @dev Number of whitelisted addresses
+    /// @dev Whitelist count
     uint256 public whitelistCount;
     
-    /// @dev Whether whitelist is enabled
+    /// @dev Is whitelist enabled
     bool public whitelistEnabled;
     
-    /// @dev Maximum mints per wallet (0 = unlimited)
+    /// @dev Max mints per wallet (0 = unlimited)
     uint256 public maxMintsPerWallet;
     
-    /// @dev Mapping of mints per wallet
-    mapping(address => uint256) internal _mintsPerWallet;
+    /// @dev Mints per wallet tracking
+    mapping(address => uint256) public mintsPerWallet;
     
-    /// @dev Whether public minting is open
+    /// @dev Is public minting open
     bool public publicMintOpen;
+    
+    /// @dev Admin addresses
+    mapping(address => bool) public admins;
+    
+    /// @dev Authorized caller addresses (other contracts)
+    mapping(address => bool) public authorizedCallers;
 
-    /**
-     * @dev Emitted when address is added to whitelist
-     * @param account The whitelisted address
-     */
+    /// @dev Emitted when added to whitelist
     event AddedToWhitelist(address indexed account);
-
-    /**
-     * @dev Emitted when address is removed from whitelist
-     * @param account The removed address
-     */
+    
+    /// @dev Emitted when removed from whitelist
     event RemovedFromWhitelist(address indexed account);
-
-    /**
-     * @dev Emitted when whitelist is enabled/disabled
-     * @param enabled New whitelist status
-     */
+    
+    /// @dev Emitted when whitelist status changes
     event WhitelistStatusChanged(bool enabled);
-
-    /**
-     * @dev Emitted when max mints per wallet changes
-     * @param oldLimit Previous limit
-     * @param newLimit New limit
-     */
-    event MaxMintsPerWalletChanged(uint256 oldLimit, uint256 newLimit);
-
-    /**
-     * @dev Emitted when public mint status changes
-     * @param open Whether public mint is open
-     */
+    
+    /// @dev Emitted when mint limit changes
+    event MintLimitChanged(uint256 newLimit);
+    
+    /// @dev Emitted when public mint status changes
     event PublicMintStatusChanged(bool open);
+    
+    /// @dev Emitted when admin status changes
+    event AdminUpdated(address indexed admin, bool status);
+    
+    /// @dev Emitted when authorized caller changes
+    event AuthorizedCallerUpdated(address indexed caller, bool status);
+    
+    /// @dev Emitted when NFTCore reference updates
+    event NFTCoreUpdated(address indexed newCore);
 
     /**
-     * @dev Modifier to check if address can mint
+     * @dev Constructor
+     * @param nftCore_ Address of NFTCore contract
      */
-    modifier canMint(address to) {
-        require(!paused(), "NFTAccess: Minting is paused");
-        
-        // Check if caller has minter role (bypass whitelist)
-        if (!hasRole(MINTER_ROLE, msg.sender) && !hasRole(ADMIN_ROLE, msg.sender)) {
-            // If whitelist is enabled, check whitelist
-            if (whitelistEnabled) {
-                require(_whitelist[to], "NFTAccess: Address not whitelisted");
-            } else {
-                // If whitelist disabled, require public mint to be open
-                require(publicMintOpen, "NFTAccess: Public minting not open");
-            }
-        }
-        
-        // Check mint limit per wallet
-        if (maxMintsPerWallet > 0) {
-            require(_mintsPerWallet[to] < maxMintsPerWallet, "NFTAccess: Wallet mint limit reached");
-        }
+    constructor(address nftCore_) Ownable(msg.sender) {
+        require(nftCore_ != address(0), "NFTAccess: Zero address");
+        nftCore = INFTCoreAccess(nftCore_);
+        admins[msg.sender] = true;
+    }
+
+    // ============ MODIFIERS ============
+
+    modifier onlyAdmin() {
+        require(admins[msg.sender] || msg.sender == owner(), "NFTAccess: Not admin");
+        _;
+    }
+    
+    modifier onlyAuthorized() {
+        require(
+            authorizedCallers[msg.sender] || admins[msg.sender] || msg.sender == owner(),
+            "NFTAccess: Not authorized"
+        );
         _;
     }
 
+    // ============ ADMIN MANAGEMENT ============
+
     /**
-     * @notice Check if an address is whitelisted
-     * @param account Address to check
-     * @return True if whitelisted
+     * @notice Add admin
+     * @param admin Address to add
      */
-    function isWhitelisted(address account) public view virtual returns (bool) {
-        return _whitelist[account];
+    function addAdmin(address admin) external onlyOwner {
+        require(admin != address(0), "NFTAccess: Zero address");
+        admins[admin] = true;
+        emit AdminUpdated(admin, true);
     }
 
     /**
-     * @notice Get number of mints by a wallet
-     * @param wallet Address to check
-     * @return Number of mints
+     * @notice Remove admin
+     * @param admin Address to remove
      */
-    function mintsOf(address wallet) public view virtual returns (uint256) {
-        return _mintsPerWallet[wallet];
+    function removeAdmin(address admin) external onlyOwner {
+        admins[admin] = false;
+        emit AdminUpdated(admin, false);
+    }
+    
+    /**
+     * @notice Authorize a caller (e.g., NFTminimint contract)
+     * @param caller Address to authorize
+     */
+    function authorizeCaller(address caller) external onlyOwner {
+        require(caller != address(0), "NFTAccess: Zero address");
+        authorizedCallers[caller] = true;
+        emit AuthorizedCallerUpdated(caller, true);
+    }
+    
+    /**
+     * @notice Revoke caller authorization
+     * @param caller Address to revoke
+     */
+    function revokeCaller(address caller) external onlyOwner {
+        authorizedCallers[caller] = false;
+        emit AuthorizedCallerUpdated(caller, false);
     }
 
     /**
-     * @notice Get remaining mints for a wallet
-     * @param wallet Address to check
-     * @return Remaining mints (type(uint256).max if unlimited)
+     * @notice Update NFTCore reference
+     * @param newCore New NFTCore address
      */
-    function remainingMints(address wallet) public view virtual returns (uint256) {
-        if (maxMintsPerWallet == 0) {
-            return type(uint256).max;
-        }
-        uint256 minted = _mintsPerWallet[wallet];
-        if (minted >= maxMintsPerWallet) {
-            return 0;
-        }
-        return maxMintsPerWallet - minted;
+    function setNFTCore(address newCore) external onlyOwner {
+        require(newCore != address(0), "NFTAccess: Zero address");
+        nftCore = INFTCoreAccess(newCore);
+        emit NFTCoreUpdated(newCore);
     }
 
+    // ============ WHITELIST MANAGEMENT ============
+
     /**
-     * @dev Internal function to add address to whitelist
-     * @param account Address to whitelist
+     * @notice Add address to whitelist
+     * @param account Address to add
      */
-    function _addToWhitelist(address account) internal virtual {
-        require(account != address(0), "NFTAccess: Cannot whitelist zero address");
-        if (!_whitelist[account]) {
-            _whitelist[account] = true;
+    function addToWhitelist(address account) external onlyAdmin {
+        require(account != address(0), "NFTAccess: Zero address");
+        if (!whitelist[account]) {
+            whitelist[account] = true;
             whitelistCount++;
             emit AddedToWhitelist(account);
         }
     }
 
     /**
-     * @dev Internal function to remove address from whitelist
+     * @notice Batch add to whitelist
+     * @param accounts Addresses to add
+     */
+    function batchAddToWhitelist(address[] calldata accounts) external onlyAdmin {
+        for (uint256 i = 0; i < accounts.length; i++) {
+            if (accounts[i] != address(0) && !whitelist[accounts[i]]) {
+                whitelist[accounts[i]] = true;
+                whitelistCount++;
+                emit AddedToWhitelist(accounts[i]);
+            }
+        }
+    }
+
+    /**
+     * @notice Remove from whitelist
      * @param account Address to remove
      */
-    function _removeFromWhitelist(address account) internal virtual {
-        if (_whitelist[account]) {
-            _whitelist[account] = false;
+    function removeFromWhitelist(address account) external onlyAdmin {
+        if (whitelist[account]) {
+            whitelist[account] = false;
             whitelistCount--;
             emit RemovedFromWhitelist(account);
         }
     }
 
     /**
-     * @dev Internal function to batch add to whitelist
-     * @param accounts Array of addresses to whitelist
+     * @notice Batch remove from whitelist
+     * @param accounts Addresses to remove
      */
-    function _batchAddToWhitelist(address[] memory accounts) internal virtual {
+    function batchRemoveFromWhitelist(address[] calldata accounts) external onlyAdmin {
         for (uint256 i = 0; i < accounts.length; i++) {
-            _addToWhitelist(accounts[i]);
+            if (whitelist[accounts[i]]) {
+                whitelist[accounts[i]] = false;
+                whitelistCount--;
+                emit RemovedFromWhitelist(accounts[i]);
+            }
         }
     }
 
     /**
-     * @dev Internal function to batch remove from whitelist
-     * @param accounts Array of addresses to remove
+     * @notice Enable/disable whitelist
+     * @param enabled New status
      */
-    function _batchRemoveFromWhitelist(address[] memory accounts) internal virtual {
-        for (uint256 i = 0; i < accounts.length; i++) {
-            _removeFromWhitelist(accounts[i]);
-        }
-    }
-
-    /**
-     * @dev Internal function to set whitelist status
-     * @param enabled Whether whitelist should be enabled
-     */
-    function _setWhitelistEnabled(bool enabled) internal virtual {
+    function setWhitelistEnabled(bool enabled) external onlyAdmin {
         whitelistEnabled = enabled;
         emit WhitelistStatusChanged(enabled);
     }
 
+    // ============ MINT LIMIT MANAGEMENT ============
+
     /**
-     * @dev Internal function to set max mints per wallet
-     * @param limit New mint limit (0 = unlimited)
+     * @notice Set max mints per wallet
+     * @param limit New limit (0 = unlimited)
      */
-    function _setMaxMintsPerWallet(uint256 limit) internal virtual {
-        uint256 oldLimit = maxMintsPerWallet;
+    function setMaxMintsPerWallet(uint256 limit) external onlyAdmin {
         maxMintsPerWallet = limit;
-        emit MaxMintsPerWalletChanged(oldLimit, limit);
+        emit MintLimitChanged(limit);
     }
 
     /**
-     * @dev Internal function to set public mint status
-     * @param open Whether public minting is open
+     * @notice Open/close public minting
+     * @param open New status
      */
-    function _setPublicMintOpen(bool open) internal virtual {
+    function setPublicMintOpen(bool open) external onlyAdmin {
         publicMintOpen = open;
         emit PublicMintStatusChanged(open);
     }
 
+    // ============ PAUSE FUNCTIONS ============
+
     /**
-     * @dev Internal function to increment wallet mint count
-     * @param wallet Address that minted
+     * @notice Pause minting
      */
-    function _incrementMintCount(address wallet) internal virtual {
-        _mintsPerWallet[wallet]++;
+    function pause() external onlyAdmin {
+        _pause();
     }
 
     /**
-     * @dev Internal function to increment mint count by amount
-     * @param wallet Address that minted
-     * @param amount Number of mints
+     * @notice Unpause minting
      */
-    function _incrementMintCountBy(address wallet, uint256 amount) internal virtual {
-        _mintsPerWallet[wallet] += amount;
+    function unpause() external onlyAdmin {
+        _unpause();
     }
 
-    // ============ Required Overrides ============
+    // ============ MINT TRACKING ============
 
-    function supportsInterface(bytes4 interfaceId) 
-        public 
-        view 
-        virtual 
-        override(NFTCore, AccessControl) 
-        returns (bool) 
-    {
-        return super.supportsInterface(interfaceId);
+    /**
+     * @notice Record a mint for a wallet
+     * @param wallet Wallet that minted
+     */
+    function recordMint(address wallet) external onlyAuthorized {
+        mintsPerWallet[wallet]++;
+    }
+
+    /**
+     * @notice Record multiple mints
+     * @param wallet Wallet that minted
+     * @param count Number of mints
+     */
+    function recordMints(address wallet, uint256 count) external onlyAuthorized {
+        mintsPerWallet[wallet] += count;
+    }
+
+    // ============ VIEW FUNCTIONS ============
+
+    /**
+     * @notice Check if address can mint
+     * @param account Address to check
+     * @return canMint_ Whether can mint
+     * @return reason Reason if cannot
+     */
+    function canMint(address account) external view returns (bool canMint_, string memory reason) {
+        if (paused()) {
+            return (false, "Minting paused");
+        }
+        
+        if (whitelistEnabled && !whitelist[account]) {
+            return (false, "Not whitelisted");
+        }
+        
+        if (!whitelistEnabled && !publicMintOpen) {
+            return (false, "Public mint not open");
+        }
+        
+        if (maxMintsPerWallet > 0 && mintsPerWallet[account] >= maxMintsPerWallet) {
+            return (false, "Wallet limit reached");
+        }
+        
+        return (true, "");
+    }
+
+    /**
+     * @notice Get remaining mints for wallet
+     * @param wallet Address to check
+     */
+    function remainingMints(address wallet) external view returns (uint256) {
+        if (maxMintsPerWallet == 0) {
+            return type(uint256).max;
+        }
+        if (mintsPerWallet[wallet] >= maxMintsPerWallet) {
+            return 0;
+        }
+        return maxMintsPerWallet - mintsPerWallet[wallet];
+    }
+
+    /**
+     * @notice Check if address is whitelisted
+     * @param account Address to check
+     */
+    function isWhitelisted(address account) external view returns (bool) {
+        return whitelist[account];
     }
 }

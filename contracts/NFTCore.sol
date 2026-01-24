@@ -4,101 +4,98 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title NFTCore
- * @dev Base ERC721 implementation with core minting functionality
+ * @dev Base ERC721 contract - DEPLOY FIRST
  * @author Adekunle Bamz
- * @notice This is the foundational contract for the NFTminimint platform
- * @dev Provides basic NFT minting, burning, and token management
+ * @notice Core NFT functionality with minting and burning
+ * 
+ * DEPLOYMENT ORDER: 1st (No dependencies)
+ * CONSTRUCTOR ARGS: 2
+ *   - name_ (string): Collection name
+ *   - symbol_ (string): Collection symbol
  */
-abstract contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, ReentrancyGuard {
+contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ReentrancyGuard {
     
-    /// @dev Counter for generating unique token IDs
-    uint256 internal _tokenIdCounter;
+    /// @dev Token ID counter
+    uint256 private _tokenIdCounter;
     
-    /// @dev Base URI for token metadata
-    string internal _baseTokenURI;
+    /// @dev Base URI for metadata
+    string private _baseTokenURI;
     
-    /// @dev Mapping from token ID to creator address
-    mapping(uint256 => address) internal _creators;
+    /// @dev Authorized minter addresses (other contracts)
+    mapping(address => bool) public authorizedMinters;
     
-    /// @dev Mapping from token ID to creation timestamp
-    mapping(uint256 => uint256) internal _mintTimestamps;
+    /// @dev Mapping from token ID to creator
+    mapping(uint256 => address) public creators;
+    
+    /// @dev Mapping from token ID to mint timestamp
+    mapping(uint256 => uint256) public mintTimestamps;
+
+    /// @dev Emitted when token is minted
+    event TokenMinted(address indexed to, uint256 indexed tokenId, address indexed minter);
+    
+    /// @dev Emitted when minter is authorized/revoked
+    event MinterUpdated(address indexed minter, bool authorized);
+    
+    /// @dev Emitted when base URI changes
+    event BaseURIUpdated(string newBaseURI);
 
     /**
-     * @dev Emitted when a new NFT is minted
-     * @param to Recipient address
-     * @param tokenId The minted token ID
-     * @param creator The original creator/minter
-     * @param timestamp Block timestamp of minting
+     * @dev Constructor
+     * @param name_ Collection name
+     * @param symbol_ Collection symbol
      */
-    event TokenMinted(
-        address indexed to,
-        uint256 indexed tokenId,
-        address indexed creator,
-        uint256 timestamp
-    );
+    constructor(
+        string memory name_,
+        string memory symbol_
+    ) ERC721(name_, symbol_) Ownable(msg.sender) {}
 
     /**
-     * @dev Emitted when a token is burned
-     * @param tokenId The burned token ID
-     * @param burner Address that burned the token
+     * @dev Modifier for authorized minters
      */
-    event TokenBurned(uint256 indexed tokenId, address indexed burner);
+    modifier onlyMinter() {
+        require(
+            authorizedMinters[msg.sender] || msg.sender == owner(),
+            "NFTCore: Not authorized minter"
+        );
+        _;
+    }
+
+    // ============ MINTER MANAGEMENT ============
 
     /**
-     * @dev Emitted when base URI is updated
-     * @param oldURI Previous base URI
-     * @param newURI New base URI
+     * @notice Authorize a minter (another contract or address)
+     * @param minter Address to authorize
      */
-    event BaseURIUpdated(string oldURI, string newURI);
-
-    /**
-     * @notice Get the creator of a specific token
-     * @param tokenId The token ID to query
-     * @return The creator's address
-     */
-    function creatorOf(uint256 tokenId) public view virtual returns (address) {
-        require(_ownerOf(tokenId) != address(0), "NFTCore: Token does not exist");
-        return _creators[tokenId];
+    function authorizeMinter(address minter) external onlyOwner {
+        require(minter != address(0), "NFTCore: Zero address");
+        authorizedMinters[minter] = true;
+        emit MinterUpdated(minter, true);
     }
 
     /**
-     * @notice Get the mint timestamp of a token
-     * @param tokenId The token ID to query
-     * @return The timestamp when the token was minted
+     * @notice Revoke minter authorization
+     * @param minter Address to revoke
      */
-    function mintTimestamp(uint256 tokenId) public view virtual returns (uint256) {
-        require(_ownerOf(tokenId) != address(0), "NFTCore: Token does not exist");
-        return _mintTimestamps[tokenId];
+    function revokeMinter(address minter) external onlyOwner {
+        authorizedMinters[minter] = false;
+        emit MinterUpdated(minter, false);
     }
 
-    /**
-     * @notice Get the current token ID counter
-     * @return Current counter value (next token ID)
-     */
-    function currentTokenId() public view virtual returns (uint256) {
-        return _tokenIdCounter;
-    }
+    // ============ MINTING ============
 
     /**
-     * @notice Get the total number of tokens minted
-     * @return Total supply of tokens
-     */
-    function totalSupply() public view virtual returns (uint256) {
-        return _tokenIdCounter;
-    }
-
-    /**
-     * @dev Internal function to mint a new token
+     * @notice Mint a new token
      * @param to Recipient address
      * @param uri Token metadata URI
-     * @return tokenId The newly minted token ID
+     * @return tokenId The minted token ID
      */
-    function _mintToken(address to, string memory uri) internal virtual returns (uint256) {
-        require(to != address(0), "NFTCore: Cannot mint to zero address");
+    function mint(address to, string memory uri) external onlyMinter nonReentrant returns (uint256) {
+        require(to != address(0), "NFTCore: Zero address");
         
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter++;
@@ -106,87 +103,118 @@ abstract contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Reentranc
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         
-        _creators[tokenId] = msg.sender;
-        _mintTimestamps[tokenId] = block.timestamp;
+        creators[tokenId] = msg.sender;
+        mintTimestamps[tokenId] = block.timestamp;
         
-        emit TokenMinted(to, tokenId, msg.sender, block.timestamp);
-        
+        emit TokenMinted(to, tokenId, msg.sender);
         return tokenId;
     }
 
     /**
-     * @dev Internal function to burn a token
-     * @param tokenId Token ID to burn
+     * @notice Batch mint tokens
+     * @param to Recipient address
+     * @param uris Array of metadata URIs
+     * @return startTokenId First minted token ID
      */
-    function _burnToken(uint256 tokenId) internal virtual {
-        address owner = _ownerOf(tokenId);
-        require(owner != address(0), "NFTCore: Token does not exist");
+    function batchMint(address to, string[] memory uris) external onlyMinter nonReentrant returns (uint256) {
+        require(to != address(0), "NFTCore: Zero address");
+        require(uris.length > 0, "NFTCore: Empty URIs");
+        require(uris.length <= 50, "NFTCore: Max 50 per batch");
         
-        super._burn(tokenId);
+        uint256 startTokenId = _tokenIdCounter;
         
-        delete _creators[tokenId];
-        delete _mintTimestamps[tokenId];
+        for (uint256 i = 0; i < uris.length; i++) {
+            uint256 tokenId = _tokenIdCounter;
+            _tokenIdCounter++;
+            
+            _safeMint(to, tokenId);
+            _setTokenURI(tokenId, uris[i]);
+            
+            creators[tokenId] = msg.sender;
+            mintTimestamps[tokenId] = block.timestamp;
+            
+            emit TokenMinted(to, tokenId, msg.sender);
+        }
         
-        emit TokenBurned(tokenId, msg.sender);
+        return startTokenId;
     }
 
+    // ============ URI MANAGEMENT ============
+
     /**
-     * @dev Set the base URI for all tokens
+     * @notice Set base URI
      * @param baseURI New base URI
      */
-    function _setBaseURI(string memory baseURI) internal virtual {
-        string memory oldURI = _baseTokenURI;
+    function setBaseURI(string memory baseURI) external onlyOwner {
         _baseTokenURI = baseURI;
-        emit BaseURIUpdated(oldURI, baseURI);
+        emit BaseURIUpdated(baseURI);
     }
 
     /**
-     * @dev Override base URI function
+     * @notice Update token URI
+     * @param tokenId Token to update
+     * @param uri New URI
      */
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
+    function setTokenURI(uint256 tokenId, string memory uri) external onlyOwner {
+        require(_ownerOf(tokenId) != address(0), "NFTCore: Token doesn't exist");
+        _setTokenURI(tokenId, uri);
+    }
+
+    // ============ VIEW FUNCTIONS ============
+
+    /**
+     * @notice Get current token ID (total minted)
+     */
+    function currentTokenId() external view returns (uint256) {
+        return _tokenIdCounter;
     }
 
     /**
-     * @notice Check if a token exists
-     * @param tokenId Token ID to check
-     * @return True if token exists
+     * @notice Get total supply
      */
-    function exists(uint256 tokenId) public view virtual returns (bool) {
+    function totalSupply() external view returns (uint256) {
+        return _tokenIdCounter;
+    }
+
+    /**
+     * @notice Check if token exists
+     */
+    function exists(uint256 tokenId) external view returns (bool) {
         return _ownerOf(tokenId) != address(0);
     }
 
     /**
-     * @dev Get all tokens owned by an address (gas intensive for large collections)
-     * @param owner Address to query
-     * @return Array of token IDs owned by the address
+     * @notice Get tokens owned by address
      */
-    function tokensOfOwner(address owner) public view virtual returns (uint256[] memory) {
-        uint256 balance = balanceOf(owner);
+    function tokensOfOwner(address owner_) external view returns (uint256[] memory) {
+        uint256 balance = balanceOf(owner_);
         uint256[] memory tokens = new uint256[](balance);
         uint256 index = 0;
         
         for (uint256 i = 0; i < _tokenIdCounter && index < balance; i++) {
-            if (_ownerOf(i) == owner) {
+            if (_ownerOf(i) == owner_) {
                 tokens[index] = i;
                 index++;
             }
         }
-        
         return tokens;
     }
 
-    // ============ Required Overrides ============
+    // ============ OVERRIDES ============
 
-    function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
+    function _baseURI() internal view override returns (string memory) {
+        return _baseTokenURI;
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721URIStorage) returns (string memory) {
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721URIStorage) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
     }
 }
