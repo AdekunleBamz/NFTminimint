@@ -101,4 +101,29 @@ describe("NFTCollection", function () {
       expect(await nftCollection.maxSupply()).to.equal(5000);
     });
   });
+
+  describe("Royalty Deletion", function () {
+    it("Should delete default royalty", async function () {
+      await nftCollection.setDefaultRoyalty(owner.address, 500);
+      await nftCollection.deleteDefaultRoyalty();
+      const [receiver, amount] = await nftCollection.royaltyInfo(1, 10000);
+      expect(amount).to.equal(0);
+    });
+
+    it("Should delete token royalty", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      await nftCollection.setTokenRoyalty(1, owner.address, 500);
+      await nftCollection.deleteTokenRoyalty(1);
+      const [receiver, amount] = await nftCollection.royaltyInfo(1, 10000);
+      expect(amount).to.equal(0);
+    });
+
+    it("Should emit TokenRoyaltyDeleted event", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      await nftCollection.setTokenRoyalty(1, owner.address, 500);
+      await expect(nftCollection.deleteTokenRoyalty(1))
+        .to.emit(nftCollection, "TokenRoyaltyDeleted")
+        .withArgs(1);
+    });
+  });
 });
