@@ -1,0 +1,50 @@
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+describe("NFTCore", function () {
+  let nftCore;
+  let owner;
+  let addr1;
+  let addr2;
+
+  beforeEach(async function () {
+    [owner, addr1, addr2] = await ethers.getSigners();
+    
+    const NFTCore = await ethers.getContractFactory("NFTCore");
+    nftCore = await NFTCore.deploy("Test Collection", "TEST");
+    await nftCore.waitForDeployment();
+  });
+
+  describe("Deployment", function () {
+    it("Should set the correct name and symbol", async function () {
+      expect(await nftCore.name()).to.equal("Test Collection");
+      expect(await nftCore.symbol()).to.equal("TEST");
+    });
+
+    it("Should set the deployer as owner", async function () {
+      expect(await nftCore.owner()).to.equal(owner.address);
+    });
+
+    it("Should start with zero total supply", async function () {
+      expect(await nftCore.totalSupply()).to.equal(0);
+    });
+  });
+
+  describe("Minting", function () {
+    it("Should allow owner to mint", async function () {
+      await nftCore.mint(addr1.address, "ipfs://test-uri");
+      expect(await nftCore.totalSupply()).to.equal(1);
+      expect(await nftCore.ownerOf(0)).to.equal(addr1.address);
+    });
+
+    it("Should store correct token URI", async function () {
+      await nftCore.mint(addr1.address, "ipfs://test-uri");
+      expect(await nftCore.tokenURI(0)).to.equal("ipfs://test-uri");
+    });
+
+    it("Should track creator address", async function () {
+      await nftCore.mint(addr1.address, "ipfs://test-uri");
+      expect(await nftCore.creators(0)).to.equal(owner.address);
+    });
+  });
+});
