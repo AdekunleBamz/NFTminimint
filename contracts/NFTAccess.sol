@@ -346,4 +346,23 @@ contract NFTAccess is Ownable, Pausable {
             remaining = minted >= limit ? 0 : limit - minted;
         }
     }
+
+    /**
+     * @notice Set wallet mint limit (alias for setMaxMintsPerWallet)
+     * @param limit New limit
+     */
+    function setWalletMintLimit(uint256 limit) external onlyAdmin {
+        maxMintsPerWallet = limit;
+        emit WalletMintLimitUpdated(limit);
+    }
+    
+    /// @dev Emitted when wallet mint limit changes
+    event WalletMintLimitUpdated(uint256 newLimit);
+
+    /**
+     * @notice Get wallet mint limit
+     */
+    function walletMintLimit() external view returns (uint256) {
+        return maxMintsPerWallet;
+    }
 }
