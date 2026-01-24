@@ -46,5 +46,17 @@ describe("NFTCore", function () {
       await nftCore.mint(addr1.address, "ipfs://test-uri");
       expect(await nftCore.creators(0)).to.equal(owner.address);
     });
+
+    it("Should record mint timestamp", async function () {
+      await nftCore.mint(addr1.address, "ipfs://test-uri");
+      const timestamp = await nftCore.mintTimestamps(0);
+      expect(timestamp).to.be.gt(0);
+    });
+
+    it("Should emit TokenMinted event", async function () {
+      await expect(nftCore.mint(addr1.address, "ipfs://test-uri"))
+        .to.emit(nftCore, "TokenMinted")
+        .withArgs(addr1.address, 0, owner.address);
+    });
   });
 });
