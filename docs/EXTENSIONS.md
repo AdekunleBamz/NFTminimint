@@ -672,3 +672,33 @@ contract MyNFT is NFTCore, NFTCrosschain {
     }
 }
 ```
+
+### NFTAllowlist
+Merkle-tree allowlist minting.
+
+**Features:**
+- Merkle root allowlist verification
+- One-time claim tracking
+- Toggle allowlist minting
+
+**Usage:**
+```solidity
+import "./extensions/NFTAllowlist.sol";
+
+contract MyNFT is NFTCore, NFTAllowlist {
+    function setMerkleRoot(bytes32 root) external onlyOwner {
+        _setMerkleRoot(root);
+    }
+
+    function setAllowlistEnabled(bool enabled) external onlyOwner {
+        _setAllowlistMintEnabled(enabled);
+    }
+
+    function allowlistMint(bytes32[] calldata proof, string memory uri) external {
+        require(isAllowlistMintEnabled(), "Allowlist mint disabled");
+        require(_verifyProof(proof, msg.sender), "Not on allowlist");
+        _markAllowlistClaimed(msg.sender);
+        mint(msg.sender, uri);
+    }
+}
+```
