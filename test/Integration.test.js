@@ -80,4 +80,25 @@ describe("NFTminimint Integration", function () {
         .withArgs(owner.address, 1, "ipfs://token3");
     });
   });
+
+  describe("Batch Minting", function () {
+    it("Should batch mint multiple NFTs", async function () {
+      const uris = ["ipfs://batch1", "ipfs://batch2", "ipfs://batch3"];
+      await nftMinimint.batchMint(uris);
+      expect(await nftCore.totalMinted()).to.equal(3);
+    });
+
+    it("Should emit BatchMinted event", async function () {
+      const uris = ["ipfs://b1", "ipfs://b2"];
+      await expect(nftMinimint.batchMint(uris))
+        .to.emit(nftMinimint, "BatchMinted");
+    });
+
+    it("Should correctly assign ownership for batch mints", async function () {
+      const uris = ["ipfs://o1", "ipfs://o2"];
+      await nftMinimint.batchMint(uris);
+      expect(await nftCore.ownerOf(1)).to.equal(owner.address);
+      expect(await nftCore.ownerOf(2)).to.equal(owner.address);
+    });
+  });
 });
