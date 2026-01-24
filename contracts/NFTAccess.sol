@@ -258,6 +258,7 @@ contract NFTAccess is Ownable, Pausable {
      */
     function recordMint(address wallet) external onlyAuthorized {
         mintsPerWallet[wallet]++;
+        emit MintRecorded(wallet, 1);
     }
 
     /**
@@ -267,6 +268,7 @@ contract NFTAccess is Ownable, Pausable {
      */
     function recordMints(address wallet, uint256 count) external onlyAuthorized {
         mintsPerWallet[wallet] += count;
+        emit MintRecorded(wallet, count);
     }
 
     // ============ VIEW FUNCTIONS ============
