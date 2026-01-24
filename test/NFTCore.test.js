@@ -59,4 +59,36 @@ describe("NFTCore", function () {
         .withArgs(addr1.address, 0, owner.address);
     });
   });
+
+  describe("Batch Minting", function () {
+    it("Should batch mint multiple tokens", async function () {
+      const uris = ["ipfs://uri1", "ipfs://uri2", "ipfs://uri3"];
+      await nftCore.batchMint(addr1.address, uris);
+      
+      expect(await nftCore.totalSupply()).to.equal(3);
+      expect(await nftCore.ownerOf(0)).to.equal(addr1.address);
+      expect(await nftCore.ownerOf(1)).to.equal(addr1.address);
+      expect(await nftCore.ownerOf(2)).to.equal(addr1.address);
+    });
+
+    it("Should return correct start token ID", async function () {
+      await nftCore.mint(addr1.address, "ipfs://first");
+      const uris = ["ipfs://uri1", "ipfs://uri2"];
+      
+      const tx = await nftCore.batchMint(addr1.address, uris);
+      // Start token ID should be 1 (after the first mint)
+      expect(await nftCore.totalSupply()).to.equal(3);
+    });
+
+    it("Should reject empty URIs array", async function () {
+      await expect(nftCore.batchMint(addr1.address, []))
+        .to.be.revertedWith("NFTCore: Empty URIs");
+    });
+
+    it("Should reject more than 50 URIs", async function () {
+      const uris = Array(51).fill("ipfs://test");
+      await expect(nftCore.batchMint(addr1.address, uris))
+        .to.be.revertedWith("NFTCore: Max 50 per batch");
+    });
+  });
 });
