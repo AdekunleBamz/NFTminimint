@@ -72,4 +72,23 @@ describe("NFTAccess", function () {
         .withArgs(addr1.address);
     });
   });
+
+  describe("Mint Limits", function () {
+    it("Should set wallet mint limit", async function () {
+      await nftAccess.setWalletMintLimit(5);
+      expect(await nftAccess.walletMintLimit()).to.equal(5);
+    });
+
+    it("Should emit WalletMintLimitUpdated event", async function () {
+      await expect(nftAccess.setWalletMintLimit(10))
+        .to.emit(nftAccess, "WalletMintLimitUpdated")
+        .withArgs(10);
+    });
+
+    it("Should track mints per wallet", async function () {
+      await nftAccess.setWalletMintLimit(5);
+      await nftAccess.recordMint(addr1.address, 2);
+      expect(await nftAccess.mintedPerWallet(addr1.address)).to.equal(2);
+    });
+  });
 });
