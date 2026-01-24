@@ -502,3 +502,27 @@ contract MyNFT is NFTCore, NFTFreeMint {
     }
 }
 ```
+
+### NFTRoyalty
+ERC2981 Royalty Standard implementation.
+
+**Features:**
+- Default royalty
+- Per-token royalty
+- ERC2981 compliance
+
+**Usage:**
+```solidity
+import "./extensions/NFTRoyalty.sol";
+
+contract MyNFT is NFTCore, NFTRoyalty {
+    function setRoyalty(address receiver, uint96 feeNumerator) external onlyOwner {
+        _setDefaultRoyalty(receiver, feeNumerator);
+    }
+    
+    // Override supportsInterface to include ERC2981
+    function supportsInterface(bytes4 interfaceId) public view override(NFTCore, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+}
+```
