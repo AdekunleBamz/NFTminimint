@@ -251,4 +251,19 @@ contract NFTCollection is Ownable, IERC2981 {
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IERC2981).interfaceId;
     }
+
+    /**
+     * @notice Get royalty info for display
+     * @param tokenId Token to query
+     */
+    function getRoyaltyInfo(uint256 tokenId) external view returns (
+        address recipient,
+        uint96 bps,
+        bool isTokenSpecific
+    ) {
+        if (hasTokenRoyalty[tokenId]) {
+            return (tokenRoyaltyRecipient[tokenId], tokenRoyaltyBps[tokenId], true);
+        }
+        return (royaltyRecipient, royaltyBps, false);
+    }
 }
