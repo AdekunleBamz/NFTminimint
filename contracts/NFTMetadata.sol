@@ -227,4 +227,19 @@ contract NFTMetadata is Ownable {
     function isTokenFrozen(uint256 tokenId) external view returns (bool) {
         return metadataFrozen || tokenMetadataFrozen[tokenId];
     }
+
+    /**
+     * @notice Remove an attribute from a token
+     * @param tokenId Token ID
+     * @param key Attribute key to remove
+     */
+    function removeAttribute(uint256 tokenId, string memory key) 
+        external 
+        onlyOwner 
+        whenTokenNotFrozen(tokenId) 
+    {
+        require(nftCore.exists(tokenId), "NFTMetadata: Token doesn't exist");
+        delete _attributes[tokenId][key];
+        emit AttributeRemoved(tokenId, key);
+    }
 }
