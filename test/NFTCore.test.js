@@ -91,4 +91,28 @@ describe("NFTCore", function () {
         .to.be.revertedWith("NFTCore: Max 50 per batch");
     });
   });
+
+  describe("Minter Authorization", function () {
+    it("Should authorize a minter", async function () {
+      await nftCore.authorizeMinter(addr1.address);
+      expect(await nftCore.authorizedMinters(addr1.address)).to.equal(true);
+    });
+
+    it("Should allow authorized minter to mint", async function () {
+      await nftCore.authorizeMinter(addr1.address);
+      await nftCore.connect(addr1).mint(addr2.address, "ipfs://test");
+      expect(await nftCore.ownerOf(0)).to.equal(addr2.address);
+    });
+
+    it("Should revoke minter authorization", async function () {
+      await nftCore.authorizeMinter(addr1.address);
+      await nftCore.revokeMinter(addr1.address);
+      expect(await nftCore.authorizedMinters(addr1.address)).to.equal(false);
+    });
+
+    it("Should reject unauthorized minter", async function () {
+      await expect(nftCore.connect(addr1).mint(addr2.address, "ipfs://test"))
+        .to.be.revertedWith("NFTCore: Not authorized minter");
+    });
+  });
 });
