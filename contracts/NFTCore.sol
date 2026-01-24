@@ -255,4 +255,13 @@ contract NFTCore is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentranc
     function totalMinted() external view returns (uint256) {
         return _tokenIdCounter;
     }
+
+    /**
+     * @notice Check if minter is authorized
+     * @param minter Address to check
+     * @return bool True if authorized
+     */
+    function isMinterAuthorized(address minter) external view returns (bool) {
+        return authorizedMinters[minter] || minter == owner();
+    }
 }
