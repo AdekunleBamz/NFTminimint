@@ -425,6 +425,37 @@ contract MyNFT is ERC721, NFTTokenLockup {
 }
 ```
 
+### NFTBlacklist
+Blocks mints and transfers to specific addresses.
+
+**Features:**
+- Per-address blacklist mapping
+- Guard helper for mint/transfer flows
+
+**Usage:**
+```solidity
+import "./extensions/NFTBlacklist.sol";
+
+contract MyNFT is ERC721, NFTBlacklist {
+    function setBlacklisted(address account, bool blacklisted) external onlyOwner {
+        _setBlacklisted(account, blacklisted);
+    }
+
+    function mint(address to) external {
+        _checkNotBlacklisted(to);
+        // mint token
+    }
+
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            _checkNotBlacklisted(to);
+        }
+        return super._update(to, tokenId, auth);
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
