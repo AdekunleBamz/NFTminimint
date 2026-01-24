@@ -62,4 +62,22 @@ describe("NFTminimint Integration", function () {
       expect(await nftMinimint.nftCollection()).to.equal(await nftCollection.getAddress());
     });
   });
+
+  describe("Minting Flow", function () {
+    it("Should mint NFT for free", async function () {
+      await nftMinimint.mint("ipfs://token1");
+      expect(await nftCore.ownerOf(1)).to.equal(owner.address);
+    });
+
+    it("Should mint to another address", async function () {
+      await nftMinimint.mintTo(addr1.address, "ipfs://token2");
+      expect(await nftCore.ownerOf(1)).to.equal(addr1.address);
+    });
+
+    it("Should emit Minted event", async function () {
+      await expect(nftMinimint.mint("ipfs://token3"))
+        .to.emit(nftMinimint, "Minted")
+        .withArgs(owner.address, 1, "ipfs://token3");
+    });
+  });
 });
