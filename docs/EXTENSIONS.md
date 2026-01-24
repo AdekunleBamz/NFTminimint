@@ -702,3 +702,27 @@ contract MyNFT is NFTCore, NFTAllowlist {
     }
 }
 ```
+
+### NFTProvenance
+Token history and provenance tracking.
+
+**Features:**
+- Mint, transfer, and sale event recording
+- Original creator tracking
+- On-chain provenance history
+
+**Usage:**
+```solidity
+import "./extensions/NFTProvenance.sol";
+
+contract MyNFT is NFTCore, NFTProvenance {
+    function mintWithProvenance(address to, string memory uri) external onlyOwner {
+        uint256 tokenId = mint(to, uri);
+        _recordMint(tokenId, to);
+    }
+    
+    function recordTransfer(uint256 tokenId, address from, address to) external onlyOwner {
+        _recordTransfer(tokenId, from, to);
+    }
+}
+```
