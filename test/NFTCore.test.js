@@ -159,4 +159,26 @@ describe("NFTCore", function () {
       expect(ownerTokens.length).to.equal(2);
     });
   });
+
+  describe("Supply Tracking", function () {
+    it("Should track total minted", async function () {
+      await nftCore.mint(owner.address, "ipfs://t1");
+      await nftCore.mint(owner.address, "ipfs://t2");
+      expect(await nftCore.totalMinted()).to.equal(2);
+    });
+
+    it("Should track circulating supply", async function () {
+      await nftCore.mint(owner.address, "ipfs://t1");
+      await nftCore.mint(owner.address, "ipfs://t2");
+      expect(await nftCore.circulatingSupply()).to.equal(2);
+    });
+
+    it("Should check if minter is authorized", async function () {
+      expect(await nftCore.isMinterAuthorized(owner.address)).to.equal(true);
+      expect(await nftCore.isMinterAuthorized(addr1.address)).to.equal(false);
+      
+      await nftCore.authorizeMinter(addr1.address);
+      expect(await nftCore.isMinterAuthorized(addr1.address)).to.equal(true);
+    });
+  });
 });
