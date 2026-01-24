@@ -53,6 +53,9 @@ contract NFTMetadata is Ownable {
     
     /// @dev Emitted when NFTCore reference is updated
     event NFTCoreUpdated(address indexed newCore);
+    
+    /// @dev Emitted when attribute is removed
+    event AttributeRemoved(uint256 indexed tokenId, string key);
 
     /**
      * @dev Constructor
