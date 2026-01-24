@@ -173,4 +173,26 @@ describe("NFTAccess", function () {
         .withArgs(addr1.address, true);
     });
   });
+
+  describe("Can Mint Check", function () {
+    it("Should return true when public mint is open", async function () {
+      await nftAccess.setPublicMintOpen(true);
+      const [canMint, reason] = await nftAccess.canMint(addr1.address);
+      expect(canMint).to.equal(true);
+      expect(reason).to.equal("");
+    });
+
+    it("Should return false when public mint closed and not whitelisted", async function () {
+      await nftAccess.setPublicMintOpen(false);
+      const [canMint, reason] = await nftAccess.canMint(addr1.address);
+      expect(canMint).to.equal(false);
+      expect(reason).to.equal("Public mint not open");
+    });
+
+    it("Should return remaining mints", async function () {
+      await nftAccess.setWalletMintLimit(5);
+      await nftAccess.recordMint(addr1.address, 2);
+      expect(await nftAccess.remainingMints(addr1.address)).to.equal(3);
+    });
+  });
 });
