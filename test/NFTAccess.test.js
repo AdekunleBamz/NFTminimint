@@ -134,4 +134,24 @@ describe("NFTAccess", function () {
       expect(await nftAccess.isAdmin(addr1.address)).to.equal(false);
     });
   });
+
+  describe("Pause Functionality", function () {
+    it("Should pause the contract", async function () {
+      await nftAccess.pause();
+      expect(await nftAccess.paused()).to.equal(true);
+    });
+
+    it("Should unpause the contract", async function () {
+      await nftAccess.pause();
+      await nftAccess.unpause();
+      expect(await nftAccess.paused()).to.equal(false);
+    });
+
+    it("Should block minting when paused", async function () {
+      await nftAccess.pause();
+      const [canMint, reason] = await nftAccess.canMint(addr1.address);
+      expect(canMint).to.equal(false);
+      expect(reason).to.equal("Minting paused");
+    });
+  });
 });
