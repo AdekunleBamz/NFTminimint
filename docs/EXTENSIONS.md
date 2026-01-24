@@ -353,6 +353,29 @@ contract MyNFT is ERC721, NFTTransferAllowlist {
 }
 ```
 
+### NFTSupplyBuffer
+Reserves a buffer of unminted supply (e.g., keep $n$ tokens unminted).
+
+**Features:**
+- Configurable supply buffer
+- Guard helper for mint flows
+
+**Usage:**
+```solidity
+import "./extensions/NFTSupplyBuffer.sol";
+
+contract MyNFT is NFTCore, NFTSupplyBuffer {
+    function setSupplyBuffer(uint256 buffer) external onlyOwner {
+        _setSupplyBuffer(buffer);
+    }
+
+    function mint(uint256 quantity) external {
+        _checkSupplyBuffer(totalSupply(), maxSupply(), quantity);
+        // mint `quantity` tokens
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
