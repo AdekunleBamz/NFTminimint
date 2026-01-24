@@ -135,4 +135,28 @@ describe("NFTCore", function () {
         .withArgs(0, "ipfs://updated");
     });
   });
+
+  describe("Token Queries", function () {
+    it("Should check if token exists", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      expect(await nftCore.exists(0)).to.equal(true);
+      expect(await nftCore.exists(999)).to.equal(false);
+    });
+
+    it("Should get token creation info", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      const [creator, timestamp] = await nftCore.getTokenCreationInfo(0);
+      expect(creator).to.equal(owner.address);
+      expect(timestamp).to.be.gt(0);
+    });
+
+    it("Should get tokens owned by address", async function () {
+      await nftCore.mint(owner.address, "ipfs://t1");
+      await nftCore.mint(owner.address, "ipfs://t2");
+      await nftCore.mint(addr1.address, "ipfs://t3");
+      
+      const ownerTokens = await nftCore.tokensOfOwner(owner.address);
+      expect(ownerTokens.length).to.equal(2);
+    });
+  });
 });
