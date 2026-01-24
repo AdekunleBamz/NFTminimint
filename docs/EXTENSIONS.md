@@ -219,6 +219,40 @@ contract MyNFT is NFTCore, NFTPermit {
 }
 ```
 
+### NFTTransferCooldown
+Enforces a minimum time interval between transfers for the same token.
+
+**Features:**
+- Global cooldown seconds
+- Per-token last transfer timestamp tracking
+- Hook-style `_checkTransferCooldown()` for ERC721 transfer integration
+
+**Usage:**
+```solidity
+import "./extensions/NFTTransferCooldown.sol";
+
+contract MyNFT is ERC721, NFTTransferCooldown {
+    function setCooldown(uint256 seconds_) external onlyOwner {
+        _setTransferCooldown(seconds_);
+    }
+
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            _checkTransferCooldown(tokenId);
+        }
+
+        address prev = super._update(to, tokenId, auth);
+
+        if (from != address(0) && to != address(0)) {
+            _recordTransfer(tokenId);
+        }
+
+        return prev;
+    }
+}
+```
+
 ## Best Practices
 
 1. **Don't inherit all extensions** - Only use what you need
