@@ -89,4 +89,19 @@ describe("Security Tests", function () {
       ).to.be.revertedWith("NFTAccess: Not admin");
     });
   });
+
+  describe("Batch Operation Limits", function () {
+    it("Should reject batch mint over 50", async function () {
+      const uris = Array(51).fill("ipfs://test");
+      await expect(
+        nftCore.batchMint(user.address, uris)
+      ).to.be.revertedWith("NFTCore: Max 50 per batch");
+    });
+
+    it("Should reject empty batch mint", async function () {
+      await expect(
+        nftCore.batchMint(user.address, [])
+      ).to.be.revertedWith("NFTCore: Empty URIs");
+    });
+  });
 });
