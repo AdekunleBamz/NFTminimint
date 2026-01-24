@@ -69,5 +69,19 @@ describe("NFTCollection", function () {
       expect(receiver).to.equal(addr1.address);
       expect(amount).to.equal(1000);
     });
+
+    it("Should emit TokenRoyaltySet event", async function () {
+      await nftCore.mint(owner.address, "ipfs://test");
+      await expect(nftCollection.setTokenRoyalty(1, addr1.address, 750))
+        .to.emit(nftCollection, "TokenRoyaltySet")
+        .withArgs(1, addr1.address, 750);
+    });
+
+    it("Should get royalty info helper", async function () {
+      await nftCollection.setDefaultRoyalty(owner.address, 250);
+      const info = await nftCollection.getRoyaltyInfo(1, 10000);
+      expect(info.receiver).to.equal(owner.address);
+      expect(info.amount).to.equal(250);
+    });
   });
 });
