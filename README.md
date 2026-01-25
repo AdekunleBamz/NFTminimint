@@ -75,14 +75,9 @@ npx hardhat compile
 npx hardhat test
 ```
 
-3. Deploy all contracts:
+3. Deploy contracts:
 ```bash
-npx hardhat run scripts/deploy-all.js --network <network>
-```
-
-4. Link contracts:
-```bash
-npx hardhat run scripts/link-contracts.js --network <network>
+npx hardhat run scripts/deploy.js --network <network>
 ```
 
 ## Frontend (Preview)
