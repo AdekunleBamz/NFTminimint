@@ -1,23 +1,14 @@
 {
   "name": "nftminimint",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A comprehensive NFT minting platform with advanced features - FREE MINTING!",
   "author": "Adekunle Bamz",
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
-    "test:gas": "npx hardhat test test/Gas.test.js",
-    "test:security": "npx hardhat test test/Security.test.js",
-    "test:integration": "npx hardhat test test/Integration.test.js",
-    "deploy": "npx hardhat run scripts/deploy-all.js",
-    "deploy:sepolia": "npx hardhat run scripts/deploy-all.js --network sepolia",
-    "deploy:mainnet": "npx hardhat run scripts/deploy-all.js --network mainnet",
-    "link": "npx hardhat run scripts/link-contracts.js",
-    "verify": "npx hardhat run scripts/verify-contracts.js",
-    "stats": "npx hardhat run scripts/collection-stats.js",
-    "airdrop": "npx hardhat run scripts/airdrop.js",
-    "coverage": "npx hardhat coverage"
+    "coverage": "npx hardhat coverage",
+    "deploy": "npx hardhat run scripts/deploy.js"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
