@@ -245,6 +245,10 @@ contract NFTCoreV3 is ERC721, ERC721URIStorage, ERC721Enumerable, Ownable, Reent
         return !lockedTokens[tokenId] && !soulBoundTokens[tokenId];
     }
 
+    function getTotalMinted() external view returns (uint256) {
+        return _tokenIdCounter;
+    }
+
     function getTokenInfo(uint256 tokenId) external view returns (
         address owner_,
         address creator,
