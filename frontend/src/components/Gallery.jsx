@@ -59,6 +59,14 @@ function Gallery({ provider, contractAddress }) {
     nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     nft.owner.toLowerCase().includes(searchTerm.toLowerCase())
   )
+  const hasSearch = searchTerm.trim().length > 0
+
+  const handleCardKeyDown = (event, nft) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleNftClick(nft)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -131,10 +139,13 @@ function Gallery({ provider, contractAddress }) {
             </button>
           </div>
         </div>
-        <div className="gallery__empty">
+        <div className="gallery__empty gallery__empty--search">
           <span className="gallery__empty-icon">🔍</span>
           <h3>No NFTs Found</h3>
-          <p>Try adjusting your search terms.</p>
+          <p>We could not find anything matching "{searchTerm}".</p>
+          <button className="gallery__clear-btn" onClick={() => setSearchTerm('')}>
+            Clear Search
+          </button>
         </div>
       </section>
     )
@@ -152,6 +163,15 @@ function Gallery({ provider, contractAddress }) {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
+          {hasSearch && (
+            <button
+              type="button"
+              className="gallery__clear-search"
+              onClick={() => setSearchTerm('')}
+            >
+              Clear
+            </button>
+          )}
         </div>
         <div className="gallery__controls">
           <button
@@ -175,6 +195,10 @@ function Gallery({ provider, contractAddress }) {
         </div>
       </div>
 
+      <p className="gallery__results" aria-live="polite">
+        Showing {filteredNfts.length} of {nfts.length} items{hasSearch ? ` for "${searchTerm}"` : ''}.
+      </p>
+
       <div className={`gallery__grid gallery__grid--${viewMode}`}>
         {filteredNfts.map((nft) => (
           <article
@@ -183,7 +207,7 @@ function Gallery({ provider, contractAddress }) {
             onClick={() => handleNftClick(nft)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && handleNftClick(nft)}
+            onKeyDown={(event) => handleCardKeyDown(event, nft)}
           >
             <div className="nft-card__image-wrapper">
               <img
