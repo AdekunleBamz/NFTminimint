@@ -1,7 +1,9 @@
-import { ethers } from 'ethers'
+import { useState } from 'react'
 import './Header.css'
 
 function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
+  const [showCopied, setShowCopied] = useState(false)
+
   const formatAddress = (addr) => {
     if (!addr) return ''
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`
@@ -19,6 +21,13 @@ function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
     return chains[id] || `Chain ${id}`
   }
 
+  const handleCopy = async () => {
+    if (!account) return
+    await navigator.clipboard.writeText(account)
+    setShowCopied(true)
+    window.setTimeout(() => setShowCopied(false), 2000)
+  }
+
   return (
     <header className="header">
       <div className="header__brand">
@@ -30,8 +39,19 @@ function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
         {account ? (
           <>
             <span className="header__chain">{getChainName(chainId)}</span>
-            <span className="header__address">{formatAddress(account)}</span>
-            <button 
+            <button
+              type="button"
+              className="header__address"
+              onClick={handleCopy}
+              aria-label={`Copy wallet address ${account}`}
+              title="Copy wallet address"
+            >
+              <span className="header__address-label">Wallet</span>
+              <span className="header__address-value" aria-hidden="true">{formatAddress(account)}</span>
+              <span className="header__address-copy" aria-hidden="true">Copy</span>
+              {showCopied && <span className="header__copied-toast">Copied</span>}
+            </button>
+            <button
               className="header__btn header__btn--disconnect"
               onClick={onDisconnect}
             >

@@ -40,6 +40,8 @@
 .header__wallet {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 1rem;
 }
 
@@ -53,12 +55,57 @@
 }
 
 .header__address {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
   padding: 0.375rem 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 0.875rem;
   color: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.header__address:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.header__address:focus-visible,
+.header__btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+}
+
+.header__address-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.header__address-copy {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #c4b5fd;
+}
+
+.header__copied-toast {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .header__btn {
@@ -104,7 +151,7 @@
   }
   
   .header__wallet {
-    flex-wrap: wrap;
-    justify-content: center;
+    width: 100%;
+    justify-content: flex-start;
   }
 }
