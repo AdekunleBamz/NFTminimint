@@ -5,19 +5,19 @@ function Footer() {
 
   const links = {
     project: [
-      { label: 'OpenSea', href: '#' },
-      { label: 'Etherscan', href: '#' },
-      { label: 'IPFS Gateway', href: '#' }
+      { label: 'Ethereum', href: 'https://ethereum.org/' },
+      { label: 'Etherscan', href: 'https://etherscan.io/' },
+      { label: 'IPFS Docs', href: 'https://docs.ipfs.tech/' }
     ],
     community: [
-      { label: 'Discord', href: '#' },
-      { label: 'Twitter', href: '#' },
-      { label: 'Telegram', href: '#' }
+      { label: 'OpenSea', href: 'https://opensea.io/' },
+      { label: 'X', href: 'https://x.com/ethereum' },
+      { label: 'MetaMask', href: 'https://metamask.io/' }
     ],
     resources: [
-      { label: 'Documentation', href: '#' },
+      { label: 'ERC-721 Docs', href: 'https://eips.ethereum.org/EIPS/eip-721' },
       { label: 'GitHub', href: 'https://github.com/AdekunleBamz/NFTminimint' },
-      { label: 'Smart Contract', href: '#' }
+      { label: 'OpenZeppelin', href: 'https://docs.openzeppelin.com/contracts/' }
     ]
   }
 
@@ -28,8 +28,8 @@ function Footer() {
           <span className="footer__logo">◆</span>
           <span className="footer__title">NFTminimint</span>
           <p className="footer__description">
-            Create and collect unique digital art on the blockchain.
-            Simple, secure, and decentralized.
+            Mint ERC-721 collectibles with a cleaner wallet flow,
+            clearer status feedback, and a gallery built for quick browsing.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ function Footer() {
             <ul className="footer__list">
               {links.project.map((link, i) => (
                 <li key={i}>
-                  <a href={link.href} className="footer__link">{link.label}</a>
+                  <a href={link.href} className="footer__link" target="_blank" rel="noopener noreferrer">{link.label}</a>
                 </li>
               ))}
             </ul>
@@ -81,7 +81,7 @@ function Footer() {
           © {currentYear} NFTminimint. All rights reserved.
         </p>
         <p className="footer__disclaimer">
-          Built with ♥ on Ethereum
+          Built for Ethereum NFT drops
         </p>
       </div>
     </footer>
