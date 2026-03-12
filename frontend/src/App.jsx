@@ -65,8 +65,17 @@ function App() {
           </div>
           
           <aside className="content-grid__sidebar">
-            <Stats contractInfo={contractInfo} isLoading={isLoading} />
-            <RecentMints provider={provider} contractAddress={contractAddress} />
+            <Stats
+              contractInfo={contractInfo}
+              isLoading={isLoading}
+              isConnected={isConnected}
+              recentActivityCount={recentMints.length}
+            />
+            <RecentMints
+              provider={provider}
+              contractAddress={contractAddress}
+              items={recentMints}
+            />
           </aside>
         </div>
 

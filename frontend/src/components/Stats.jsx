@@ -1,6 +1,6 @@
 import './Stats.css'
 
-function Stats({ contractInfo, isLoading }) {
+function Stats({ contractInfo, isLoading, isConnected = false, recentActivityCount = 0 }) {
   const formatEther = (wei) => {
     if (!wei) return '0'
     try {
@@ -63,6 +63,11 @@ function Stats({ contractInfo, isLoading }) {
   return (
     <section className="stats">
       <h2 className="stats__title">Collection Stats</h2>
+
+      <div className="stats__meta">
+        <span>{isConnected ? 'Wallet connected' : 'Wallet disconnected'}</span>
+        <span>{recentActivityCount} local receipts</span>
+      </div>
       
       <div className="stats__progress">
         <div className="progress-bar">

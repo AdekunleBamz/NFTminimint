@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './RecentMints.css'
 
-function RecentMints({ provider, contractAddress }) {
+function RecentMints({ provider, contractAddress, items = [] }) {
   const [recentMints, setRecentMints] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -24,6 +24,12 @@ function RecentMints({ provider, contractAddress }) {
   }
 
   useEffect(() => {
+    if (items.length > 0) {
+      setRecentMints(items)
+      setIsLoading(false)
+      return
+    }
+
     // Simulated recent mints for demo
     // In production, this would query Transfer events from the contract
     const mockMints = [
@@ -34,7 +40,7 @@ function RecentMints({ provider, contractAddress }) {
 
     setRecentMints(mockMints)
     setIsLoading(false)
-  }, [provider, contractAddress])
+  }, [provider, contractAddress, items])
 
   if (isLoading) {
     return (
@@ -70,6 +76,7 @@ function RecentMints({ provider, contractAddress }) {
   return (
     <section className="recent-mints">
       <h2 className="recent-mints__title">Recent Mints</h2>
+      <p className="recent-mints__subtitle">New local mint receipts appear here right after a successful transaction.</p>
       <div className="recent-mints__list">
         {recentMints.map((mint) => (
           <div key={mint.tokenId} className="mint-item">
