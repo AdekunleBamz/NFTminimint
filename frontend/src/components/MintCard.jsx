@@ -53,6 +53,16 @@ function MintCard({
 
   const isSoldOut = contractInfo?.totalSupply >= contractInfo?.maxSupply
   const walletLimitReached = contractInfo?.walletMinted >= contractInfo?.maxPerWallet
+  const mintActionMessage = contractInfo?.isPaused
+    ? 'Minting is paused by the collection owner.'
+    : isSoldOut
+      ? 'This drop has sold out.'
+      : walletLimitReached
+        ? 'This wallet already reached the mint limit.'
+        : !tokenURI.trim()
+          ? 'Add a metadata URL to unlock the mint action.'
+          : 'Ready to mint after wallet confirmation.'
+  const txHash = mintStatus?.txHash || mintStatus?.transactionHash
 
   return (
     <div className="mint-card">
@@ -123,6 +133,7 @@ function MintCard({
             type="submit"
             className="mint-card__btn mint-card__btn--primary"
             disabled={
+              !tokenURI.trim() ||
               isMinting || 
               isSoldOut || 
               walletLimitReached || 
@@ -143,12 +154,16 @@ function MintCard({
             )}
           </button>
 
+          <p className="mint-card__helper" aria-live="polite">
+            {mintActionMessage}
+          </p>
+
           {mintStatus && (
             <div className={`mint-card__status mint-card__status--${mintStatus.type}`}>
               <span>{mintStatus.message}</span>
-              {mintStatus.txHash && (
+              {txHash && (
                 <a
-                  href={`https://etherscan.io/tx/${mintStatus.txHash}`}
+                  href={`https://etherscan.io/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mint-card__tx-link"
