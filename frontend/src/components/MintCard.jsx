@@ -12,11 +12,26 @@ function MintCard({
   const [isMinting, setIsMinting] = useState(false)
   const [mintStatus, setMintStatus] = useState(null)
 
+  const isTokenUriValid = (value) => {
+    if (!value) return false
+    const trimmed = value.trim()
+    if (trimmed.startsWith('ipfs://')) return true
+    try {
+      const parsed = new URL(trimmed)
+      return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+    } catch {
+      return false
+    }
+  }
+
   const handleMint = async (e) => {
     e.preventDefault()
     
-    if (!tokenURI.trim()) {
-      setMintStatus({ type: 'error', message: 'Please enter a valid token URI' })
+    if (!isTokenUriValid(tokenURI)) {
+      setMintStatus({
+        type: 'error',
+        message: 'Enter a valid metadata URL. Use ipfs:// or a full https:// link.',
+      })
       return
     }
 
@@ -123,8 +138,10 @@ function MintCard({
               value={tokenURI}
               onChange={(e) => setTokenURI(e.target.value)}
               disabled={isMinting || isSoldOut || contractInfo?.isPaused}
+              aria-invalid={tokenURI.length > 0 && !isTokenUriValid(tokenURI)}
+              aria-describedby="token-uri-hint"
             />
-            <span className="form-hint">
+            <span className="form-hint" id="token-uri-hint">
               IPFS or HTTP link to your NFT metadata JSON
             </span>
           </div>
@@ -133,7 +150,7 @@ function MintCard({
             type="submit"
             className="mint-card__btn mint-card__btn--primary"
             disabled={
-              !tokenURI.trim() ||
+              !isTokenUriValid(tokenURI) ||
               isMinting || 
               isSoldOut || 
               walletLimitReached || 

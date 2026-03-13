@@ -135,6 +135,11 @@
   cursor: not-allowed;
 }
 
+.form-input[aria-invalid="true"] {
+  border-color: rgba(239, 68, 68, 0.8);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
 .form-hint {
   font-size: 0.75rem;
   color: #6b7280;
