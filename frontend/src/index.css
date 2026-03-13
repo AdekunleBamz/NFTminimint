@@ -87,3 +87,25 @@ button {
   white-space: nowrap;
   border: 0;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .nft-card:hover,
+  .modal__btn:hover,
+  .header__btn--connect:hover:not(:disabled),
+  .mint-card__btn--primary:hover:not(:disabled) {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
