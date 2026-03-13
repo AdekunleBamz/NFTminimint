@@ -108,6 +108,10 @@
   font-weight: 700;
 }
 
+.header__copied-toast--error {
+  background: #ef4444;
+}
+
 .header__btn {
   padding: 0.625rem 1.25rem;
   border: none;

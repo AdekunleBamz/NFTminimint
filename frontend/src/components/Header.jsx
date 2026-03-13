@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './Header.css'
 
 function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
-  const [showCopied, setShowCopied] = useState(false)
+  const [copyStatus, setCopyStatus] = useState(null)
 
   const formatAddress = (addr) => {
     if (!addr) return ''
@@ -23,9 +23,13 @@ function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
 
   const handleCopy = async () => {
     if (!account) return
-    await navigator.clipboard.writeText(account)
-    setShowCopied(true)
-    window.setTimeout(() => setShowCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(account)
+      setCopyStatus('copied')
+    } catch {
+      setCopyStatus('failed')
+    }
+    window.setTimeout(() => setCopyStatus(null), 2000)
   }
 
   return (
@@ -49,9 +53,18 @@ function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
               <span className="header__address-label">Wallet</span>
               <span className="header__address-value" aria-hidden="true">{formatAddress(account)}</span>
               <span className="header__address-copy" aria-hidden="true">Copy</span>
-              {showCopied && <span className="header__copied-toast">Copied</span>}
+              {copyStatus && (
+                <span
+                  className={`header__copied-toast ${
+                    copyStatus === 'failed' ? 'header__copied-toast--error' : ''
+                  }`}
+                >
+                  {copyStatus === 'copied' ? 'Copied' : 'Copy failed'}
+                </span>
+              )}
             </button>
             <button
+              type="button"
               className="header__btn header__btn--disconnect"
               onClick={onDisconnect}
             >
@@ -60,6 +73,7 @@ function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
           </>
         ) : (
           <button 
+            type="button"
             className="header__btn header__btn--connect"
             onClick={onConnect}
             disabled={isConnecting}
@@ -68,6 +82,9 @@ function Header({ account, chainId, onConnect, onDisconnect, isConnecting }) {
           </button>
         )}
       </div>
+      <span className="sr-only" aria-live="polite">
+        {copyStatus === 'copied' ? 'Wallet address copied.' : copyStatus === 'failed' ? 'Unable to copy wallet address.' : ''}
+      </span>
     </header>
   )
 }
