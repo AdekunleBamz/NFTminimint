@@ -7,6 +7,7 @@ function Gallery({ provider, contractAddress }) {
   const [selectedNft, setSelectedNft] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
   const [searchTerm, setSearchTerm] = useState('')
+  const quickFilters = ['Genesis', '0x1234', '0xabcd']
 
   // Sample NFT data for demonstration
   useEffect(() => {
@@ -115,6 +116,11 @@ function Gallery({ provider, contractAddress }) {
               placeholder="Search NFTs by name or owner..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  setSearchTerm('')
+                }
+              }}
               className="search-input"
             />
           </div>
@@ -139,11 +145,23 @@ function Gallery({ provider, contractAddress }) {
             </button>
           </div>
         </div>
+        <div className="gallery__chips" aria-label="Quick search filters">
+          {quickFilters.map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              className="gallery__chip"
+              onClick={() => setSearchTerm(filter)}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
         <div className="gallery__empty gallery__empty--search">
           <span className="gallery__empty-icon">🔍</span>
           <h3>No NFTs Found</h3>
           <p>We could not find anything matching "{searchTerm}".</p>
-          <button className="gallery__clear-btn" onClick={() => setSearchTerm('')}>
+          <button className="gallery__clear-btn" onClick={() => setSearchTerm('')} aria-label="Clear NFT search">
             Clear Search
           </button>
         </div>
@@ -161,6 +179,11 @@ function Gallery({ provider, contractAddress }) {
             placeholder="Search NFTs by name or owner..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                setSearchTerm('')
+              }
+            }}
             className="search-input"
           />
           {hasSearch && (
@@ -168,6 +191,7 @@ function Gallery({ provider, contractAddress }) {
               type="button"
               className="gallery__clear-search"
               onClick={() => setSearchTerm('')}
+              aria-label="Clear NFT search"
             >
               Clear
             </button>
@@ -195,8 +219,21 @@ function Gallery({ provider, contractAddress }) {
         </div>
       </div>
 
+      <div className="gallery__chips" aria-label="Quick search filters">
+        {quickFilters.map((filter) => (
+          <button
+            key={filter}
+            type="button"
+            className="gallery__chip"
+            onClick={() => setSearchTerm(filter)}
+          >
+            {filter}
+          </button>
+        ))}
+      </div>
+
       <p className="gallery__results" aria-live="polite">
-        Showing {filteredNfts.length} of {nfts.length} items{hasSearch ? ` for "${searchTerm}"` : ''}.
+        Showing {filteredNfts.length} of {nfts.length} items in {viewMode} view{hasSearch ? ` for "${searchTerm}"` : ''}.
       </p>
 
       <div className={`gallery__grid gallery__grid--${viewMode}`}>
