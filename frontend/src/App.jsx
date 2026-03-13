@@ -27,6 +27,9 @@ function App() {
 
   return (
     <div className="app">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <Header 
         account={account}
         chainId={chainId}
@@ -35,13 +38,13 @@ function App() {
         isConnecting={isConnecting}
       />
       
-      <main className="main">
+      <main id="main-content" className="main" tabIndex={-1}>
         <section className="hero">
           <div className="hero__content">
-            <span className="hero__badge">ERC-721</span>
+            <span className="hero__badge">SIP-009</span>
             <h1 className="hero__title">NFTminimint</h1>
             <p className="hero__subtitle">
-              A minimal, gas-efficient NFT minting experience on Ethereum
+              A minimal NFT minting experience tailored for the Stacks ecosystem
             </p>
           </div>
         </section>
